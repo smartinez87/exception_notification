@@ -24,6 +24,11 @@ class ExceptionNotification::Notifier < ActionMailer::Base
   self.mailer_name = 'exception_notifier'
   self.view_paths << "#{File.dirname(__FILE__)}/../../views"
   
+  # next line is a hack to fix
+  # undefined method `find_template' for #<Array:0x000001009cd230>
+  # after Rails 2.3.8 -> 2.3.11 upgrade
+  self.view_paths = ActionView::PathSet.new(self.view_paths) unless self.view_paths.respond_to?(:find_template)
+  
   @@sender_address = %("Exception Notifier" <exception.notifier@default.com>)
   cattr_accessor :sender_address
 
