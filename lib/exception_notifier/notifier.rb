@@ -52,6 +52,7 @@ class ExceptionNotifier
 
       prefix   = "#{@options[:email_prefix]}#{@kontroller.controller_name}##{@kontroller.action_name}"
       subject  = "#{prefix} (#{@exception.class}) #{@exception.message.inspect}"
+      subject  = subject.length > 120 ? subject[0...120] + "..." : subject
 
       mail(:to => @options[:exception_recipients], :from => @options[:sender_address], :subject => subject) do |format|
         format.text { render "#{mailer_name}/exception_notification" }
