@@ -12,13 +12,19 @@ class ExceptionNotifier
 
   def initialize(app, options = {})
     @app, @options = app, options
+    
+    Notifier.default_sender_address       = @options[:sender_address]
+    Notifier.default_exception_recipients = @options[:exception_recipients]
+    Notifier.default_email_prefix         = @options[:email_prefix]
+    Notifier.default_sections             = @options[:sections]
+    
     @options[:ignore_exceptions] ||= self.class.default_ignore_exceptions
   end
 
   def call(env)
     @app.call(env)
   rescue Exception => exception
-    options = (env['exception_notifier.options'] ||= {})
+    options = (env['exception_notifier.options'] ||= Notifier.default_options)
     options.reverse_merge!(@options)
 
     unless Array.wrap(options[:ignore_exceptions]).include?(exception.class)

@@ -7,20 +7,25 @@ class ExceptionNotifier
     self.append_view_path "#{File.dirname(__FILE__)}/views"
 
     class << self
+      attr_writer :default_sender_address
+      attr_writer :default_exception_recipients
+      attr_writer :default_email_prefix
+      attr_writer :default_sections
+      
       def default_sender_address
-        %("Exception Notifier" <exception.notifier@default.com>)
+        @default_sender_address || %("Exception Notifier" <exception.notifier@default.com>)
       end
 
       def default_exception_recipients
-        []
+        @default_exception_recipients || []
       end
 
       def default_email_prefix
-        "[ERROR] "
+        @default_email_prefix || "[ERROR] "
       end
 
       def default_sections
-        %w(request session environment backtrace)
+        @default_sections || %w(request session environment backtrace)
       end
 
       def default_options
