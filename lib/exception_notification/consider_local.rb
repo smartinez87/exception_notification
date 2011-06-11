@@ -1,12 +1,12 @@
 #This didn't belong on ExceptionNotifier and made backtraces worse.  To keep original functionality in place
 #'ActionController::Base.send :include, ExceptionNotification::ConsiderLocal' or just include in your controller
 module ExceptionNotification::ConsiderLocal
+  def self.included(target)
+    require 'ipaddr'
+    target.extend(ClassMethods)
+  end
+
   module ClassMethods
-    def self.included(target)
-      require 'ipaddr'
-      target.extend(ClassMethods)
-    end
-    
     def consider_local(*args)
       local_addresses.concat(args.flatten.map { |a| IPAddr.new(a) })
     end
