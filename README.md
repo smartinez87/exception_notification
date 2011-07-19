@@ -49,8 +49,21 @@ access to the following variables:
 You can reorder the sections, or exclude sections completely, by altering the
 ExceptionNotifier.sections variable. You can even add new sections that
 describe application-specific data--just add the section's name to the list
-(whereever you'd like), and define the corresponding partial. Then, if your
-new section requires information that isn't available by default, make sure
+(wherever you'd like), and define the corresponding partial. 
+   
+    #Example with two new added sections
+    Whatever::Application.config.middleware.use ExceptionNotifier,
+	   :email_prefix => "[Whatever] ",
+	   :sender_address => %{"notifier" <notifier@example.com>},
+	   :exception_recipients => %w{exceptions@example.com},
+	   :sections => %w{my_section1 my_section2} + ExceptionNotifier::Notifier.default_sections
+
+When you add a new section or customize a section, you need to inform the gem where the views are.
+Create an initializer called config/initializers/exception_notifier.rb with the following code:
+
+    ExceptionNotifier::Notifier.prepend_view_path File.join(Rails.root, 'app/views')	
+
+If your new section requires information that isn't available by default, make sure
 it is made available to the email using the exception_data macro:
 
     class ApplicationController < ActionController::Base
