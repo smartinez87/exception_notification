@@ -69,4 +69,18 @@ class PostsControllerTest < ActionController::TestCase
     assert request.ssl?
     assert @secured_mail.body.include? "* session id: [FILTERED]\n  *"
   end
+
+  test "should not include exception message in subject" do
+    begin
+      @post = posts(:one)
+      post :create, :post => @post.attributes
+    rescue => e
+      @exception = e
+      custom_env = request.env
+      custom_env['exception_notifier.options']||={}
+      custom_env['exception_notifier.options'].merge!(:verbose_subject => false)
+      @mail = ExceptionNotifier::Notifier.exception_notification(custom_env, @exception)
+    end
+    assert_equal "[Dummy ERROR] # (NoMethodError)", @mail.subject
+  end
 end

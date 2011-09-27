@@ -35,7 +35,8 @@ class ExceptionNotifier
         { :sender_address => default_sender_address,
           :exception_recipients => default_exception_recipients,
           :email_prefix => default_email_prefix,
-          :sections => default_sections }
+          :sections => default_sections,
+          :verbose_subject => true }
       end
     end
 
@@ -58,9 +59,7 @@ class ExceptionNotifier
         instance_variable_set("@#{name}", value)
       end
 
-      prefix  = "#{@options[:email_prefix]}#{@kontroller.controller_name}##{@kontroller.action_name}"
-      subject = "#{prefix} (#{@exception.class}) #{@exception.message.inspect}"
-      subject = subject.length > 120 ? subject[0...120] + "..." : subject
+      subject = compose_subject("#{@kontroller.controller_name}##{@kontroller.action_name}")
 
       mail(:to => @options[:exception_recipients], :from => @options[:sender_address], :subject => subject) do |format|
         format.text { render "#{mailer_name}/exception_notification" }
@@ -70,11 +69,10 @@ class ExceptionNotifier
     def background_exception_notification(exception)
       if @notifier = Rails.application.config.middleware.detect{ |x| x.klass == ExceptionNotifier }
         @options = (@notifier.args.first || {}).reverse_merge(self.class.default_options)
-        subject  = "#{@options[:email_prefix]} (#{exception.class}) #{exception.message.inspect}"
-
         @exception = exception
         @backtrace = exception.backtrace || []
         @sections  = %w{backtrace}
+        subject  = compose_subject"#{@options[:email_prefix]} (#{exception.class}) #{exception.message.inspect}"
 
         mail(:to => @options[:exception_recipients], :from => @options[:sender_address], :subject => subject) do |format|
           format.text { render "#{mailer_name}/background_exception_notification" }
@@ -84,6 +82,13 @@ class ExceptionNotifier
 
     private
 
+    def compose_subject(name = '')
+      subject = "#{@options[:email_prefix]}#{name}"
+      subject << " (#{@exception.class})"
+      subject << " #{@exception.message.inspect}" if @options[:verbose_subject]
+      subject.length > 120 ? subject[0...120] + "..." : subject
+    end
+    
     def clean_backtrace(exception)
       if Rails.respond_to?(:backtrace_cleaner)
        Rails.backtrace_cleaner.send(:filter, exception.backtrace)

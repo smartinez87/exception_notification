@@ -32,7 +32,8 @@ run on production. You can make it work by
 
 Customization
 ---
-
+By default subject includes exception message. Use :verbose_subject => false
+to exclude it from subject.
 By default, the notification email includes four parts: request, session,
 environment, and backtrace (in that order). You can customize how each of those
 sections are rendered by placing a partial named for that part in your
