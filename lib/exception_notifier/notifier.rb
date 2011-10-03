@@ -14,6 +14,7 @@ class ExceptionNotifier
       attr_writer :default_exception_recipients
       attr_writer :default_email_prefix
       attr_writer :default_sections
+      attr_writer :default_verbose_subject
 
       def default_sender_address
         @default_sender_address || %("Exception Notifier" <exception.notifier@default.com>)
@@ -30,13 +31,17 @@ class ExceptionNotifier
       def default_sections
         @default_sections || %w(request session environment backtrace)
       end
+      
+      def default_verbose_subject
+        @default_verbose_subject.nil? || @default_verbose_subject
+      end
 
       def default_options
         { :sender_address => default_sender_address,
           :exception_recipients => default_exception_recipients,
           :email_prefix => default_email_prefix,
           :sections => default_sections,
-          :verbose_subject => true }
+          :verbose_subject => default_verbose_subject }
       end
     end
 
@@ -58,7 +63,6 @@ class ExceptionNotifier
       data.each do |name, value|
         instance_variable_set("@#{name}", value)
       end
-
       subject = compose_subject(exception, @kontroller)
 
       mail(:to => @options[:exception_recipients], :from => @options[:sender_address], :subject => subject) do |format|

@@ -83,4 +83,23 @@ class PostsControllerTest < ActionController::TestCase
     end
     assert_equal "[Dummy ERROR] # (NoMethodError)", @mail.subject
   end
+  
+end
+
+class PostsControllerTestWithoutVerboseSubject < ActionController::TestCase
+  tests PostsController
+  setup do
+    ExceptionNotifier::Notifier.default_verbose_subject = false
+    begin
+      @post = posts(:one)
+      post :create, :post => @post.attributes
+    rescue => e
+      @exception = e
+      @mail = ExceptionNotifier::Notifier.exception_notification(request.env, @exception)
+    end
+  end
+  
+  test "should not include exception message in subject" do
+    assert_equal "[Dummy ERROR] # (NoMethodError)", @mail.subject
+  end
 end

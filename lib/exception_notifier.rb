@@ -17,6 +17,7 @@ class ExceptionNotifier
     Notifier.default_exception_recipients = @options[:exception_recipients]
     Notifier.default_email_prefix         = @options[:email_prefix]
     Notifier.default_sections             = @options[:sections]
+    Notifier.default_verbose_subject      = @options[:verbose_subject]
 
     @options[:ignore_exceptions] ||= self.class.default_ignore_exceptions
   end
