@@ -107,3 +107,24 @@ class PostsControllerTestWithoutVerboseSubject < ActionController::TestCase
     assert_equal "[ERROR] # (NoMethodError)", @mail.subject
   end
 end
+
+class PostsControllerTestBadRequestData < ActionController::TestCase
+  tests PostsController
+  setup do
+    ExceptionNotifier::Notifier.default_verbose_subject = false
+    begin
+      request.env['invalid_encoding_from_middleware'] = CGI.unescape("%c3%ef%bf%bb").force_encoding("UTF-8")
+
+      @post = posts(:one)
+      post :create, :post => @post.attributes
+    rescue => e
+      @exception = e
+      @mail = ExceptionNotifier::Notifier.exception_notification(request.env, @exception)
+    end
+  end
+
+  test "should not include exception message in subject" do
+    assert_equal "[ERROR] # (NoMethodError)", @mail.subject
+    assert_match /ERROR: Failed to generate exception summary/, @mail.body.to_s
+  end
+end
