@@ -107,3 +107,30 @@ class PostsControllerTestWithoutVerboseSubject < ActionController::TestCase
     assert_equal "[ERROR] # (NoMethodError)", @mail.subject
   end
 end
+
+class PostsControllerTestBadRequestData < ActionController::TestCase
+  tests PostsController
+  setup do
+    begin
+      # This might seem synthetic, but the point is that the data used by
+      # ExceptionNotification could be rendered "invalid" by e.g. a badly
+      # behaving middleware, and we want to test that ExceptionNotification
+      # still manages to send off an email in those cases.
+      #
+      # The trick here is to trigger an exception in the template used by
+      # ExceptionNotification. (The original test stuffed request.env with
+      # badly encoded strings, but that only works in Ruby 1.9+.)
+      request.send :instance_variable_set, :@env, {}
+
+      @post = posts(:one)
+      post :create, :post => @post.attributes
+    rescue => e
+      @exception = e
+      @mail = ExceptionNotifier::Notifier.exception_notification(request.env, @exception)
+    end
+  end
+
+  test "should include error message in body" do
+    assert_match /ERROR: Failed to generate exception summary/, @mail.body.to_s
+  end
+end
