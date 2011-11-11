@@ -112,7 +112,15 @@ class PostsControllerTestBadRequestData < ActionController::TestCase
   tests PostsController
   setup do
     begin
-      request.env['invalid_encoding_from_middleware'] = CGI.unescape("%c3%ef%bf%bb").force_encoding("UTF-8")
+      # This might seem synthetic, but the point is that the data used by
+      # ExceptionNotification could be rendered "invalid" by e.g. a badly
+      # behaving middleware, and we want to test that ExceptionNotification
+      # still manages to send off an email in those cases.
+      #
+      # The trick here is to trigger an exception in the template used by
+      # ExceptionNotification. (The original test stuffed request.env with
+      # badly encoded strings, but that only works in Ruby 1.9+.)
+      request.send :instance_variable_set, :@env, {}
 
       @post = posts(:one)
       post :create, :post => @post.attributes
