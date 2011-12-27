@@ -14,6 +14,7 @@ class ExceptionNotifier
       attr_writer :default_exception_recipients
       attr_writer :default_email_prefix
       attr_writer :default_sections
+      attr_writer :default_background_sections
       attr_writer :default_verbose_subject
 
       def default_sender_address
@@ -32,6 +33,10 @@ class ExceptionNotifier
         @default_sections || %w(request session environment backtrace)
       end
 
+      def default_background_sections
+        @default_background_sections || %w(backtrace data)
+      end
+
       def default_verbose_subject
         @default_verbose_subject.nil? || @default_verbose_subject
       end
@@ -41,6 +46,7 @@ class ExceptionNotifier
           :exception_recipients => default_exception_recipients,
           :email_prefix => default_email_prefix,
           :sections => default_sections,
+          :background_sections => default_background_sections,
           :verbose_subject => default_verbose_subject }
       end
     end
@@ -70,12 +76,17 @@ class ExceptionNotifier
       end
     end
 
-    def background_exception_notification(exception)
+    def background_exception_notification(exception, data={})
       if @notifier = Rails.application.config.middleware.detect{ |x| x.klass == ExceptionNotifier }
         @options = (@notifier.args.first || {}).reverse_merge(self.class.default_options)
         @exception = exception
         @backtrace = exception.backtrace || []
-        @sections  = %w{backtrace}
+        @sections = @options[:background_sections]
+        @data = data
+
+        data.each do |name, value|
+          instance_variable_set("@#{name}", value)
+        end
         subject  = compose_subject(exception)
 
         mail(:to => @options[:exception_recipients], :from => @options[:sender_address], :subject => subject) do |format|

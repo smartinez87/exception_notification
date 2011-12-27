@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    exception_notification (2.4.1)
+    exception_notification (2.5.2)
       actionmailer (>= 3.0.4)
 
 GEM

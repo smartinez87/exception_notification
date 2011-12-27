@@ -17,6 +17,10 @@ class ExceptionNotificationTest < ActiveSupport::TestCase
     assert ExceptionNotifier::Notifier.default_sections == %w(request session environment backtrace)
   end
 
+  test "should have default background sections" do
+    assert ExceptionNotifier::Notifier.default_background_sections == %w(backtrace data)
+  end
+
   test "should have verbose subject by default" do
     assert ExceptionNotifier::Notifier.default_options[:verbose_subject] == true
   end

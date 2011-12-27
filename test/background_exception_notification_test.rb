@@ -6,7 +6,8 @@ class BackgroundExceptionNotificationTest < ActiveSupport::TestCase
       1/0
     rescue => e
       @exception = e
-      @mail = ExceptionNotifier::Notifier.background_exception_notification(@exception)
+      @mail = ExceptionNotifier::Notifier.background_exception_notification(@exception,
+        {:job => 'DivideWorkerJob', :payload => '1/0'})
     end
   end
 
@@ -36,6 +37,10 @@ class BackgroundExceptionNotificationTest < ActiveSupport::TestCase
 
   test "mail should contain backtrace in body" do
     assert @mail.body.include? "test/background_exception_notification_test.rb:6"
+  end
+
+  test "mail should contain data in body" do
+    assert @mail.body.include? '* data: {:job=>"DivideWorkerJob", :payload=>"1/0"}'
   end
 
   test "mail should not contain any attachments" do
