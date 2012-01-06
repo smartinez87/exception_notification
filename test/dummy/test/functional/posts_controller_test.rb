@@ -38,6 +38,10 @@ class PostsControllerTest < ActionController::TestCase
   test "mail should contain timestamp of exception in body" do
     assert @mail.body.include? "Timestamp : #{Time.now}"
   end
+  
+  test "mail should contain the newly defined section" do
+    assert @mail.body.include? "* New section for testing"
+  end
 
   test "should filter sensible data" do
     assert @mail.body.include? "secret\"=>\"[FILTERED]"

@@ -14,7 +14,9 @@ class ExceptionNotificationTest < ActiveSupport::TestCase
   end
 
   test "should have default sections" do
-    assert ExceptionNotifier::Notifier.default_sections == %w(request session environment backtrace)
+    for section in %w(request session environment backtrace)
+      assert ExceptionNotifier::Notifier.default_sections.include? section
+    end
   end
 
   test "should have default background sections" do
@@ -28,4 +30,5 @@ class ExceptionNotificationTest < ActiveSupport::TestCase
   test "should have ignored crawler by default" do
     assert ExceptionNotifier.default_ignore_crawlers == []
   end
+  
 end
