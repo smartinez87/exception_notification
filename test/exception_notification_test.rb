@@ -30,5 +30,10 @@ class ExceptionNotificationTest < ActiveSupport::TestCase
   test "should have ignored crawler by default" do
     assert ExceptionNotifier.default_ignore_crawlers == []
   end
+
+  test "should normalize multiple digits into one N" do
+    assert_equal 'N foo N bar N baz N',
+      ExceptionNotifier::Notifier.normalize_digits('1 foo 12 bar 123 baz 1234')
+  end
   
 end

@@ -23,6 +23,7 @@ class ExceptionNotifier
     Notifier.default_sections             = @options[:sections]
     Notifier.default_background_sections  = @options[:background_sections]
     Notifier.default_verbose_subject      = @options[:verbose_subject]
+    Notifier.default_normalize_subject    = @options[:normalize_subject]
 
     @options[:ignore_exceptions] ||= self.class.default_ignore_exceptions
     @options[:ignore_crawlers]   ||= self.class.default_ignore_crawlers
