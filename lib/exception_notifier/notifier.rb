@@ -65,9 +65,10 @@ class ExceptionNotifier
       end
     end
 
-    def exception_notification(env, exception)
+    def exception_notification(env, exception, options={})
+      raise exception if Rails.env.development?
       self.append_view_path Rails.root.nil? ? "app/views" : "#{Rails.root}/app/views" if defined?(Rails)
-      
+
       @env        = env
       @exception  = exception
       @options    = (env['exception_notifier.options'] || {}).reverse_merge(self.class.default_options)
@@ -76,6 +77,8 @@ class ExceptionNotifier
       @backtrace  = exception.backtrace ? clean_backtrace(exception) : []
       @sections   = @options[:sections]
       data        = env['exception_notifier.exception_data'] || {}
+
+      process_custom(options[:custom_message], options[:custom_hash])
 
       data.each do |name, value|
         instance_variable_set("@#{name}", value)
@@ -87,7 +90,8 @@ class ExceptionNotifier
       end
     end
 
-    def background_exception_notification(exception, data={})
+    def background_exception_notification(exception, data={}, options={})
+      raise exception if Rails.env.development?
       if @notifier = Rails.application.config.middleware.detect{ |x| x.klass == ExceptionNotifier }
         @options = (@notifier.args.first || {}).reverse_merge(self.class.default_options)
         @exception = exception
@@ -100,6 +104,8 @@ class ExceptionNotifier
         end
         subject  = compose_subject(exception)
 
+        process_custom(options[:custom_message], options[:custom_hash])
+
         mail(:to => @options[:exception_recipients], :from => @options[:sender_address], :subject => subject) do |format|
           format.text { render "#{mailer_name}/background_exception_notification" }
         end.deliver
@@ -107,6 +113,14 @@ class ExceptionNotifier
     end
 
     private
+
+    def process_custom(m, h)
+      @custom_message = m
+      @custom_hash    = h
+      if @custom_hash || @custom_message
+        @sections = ['custom'] + @sections
+      end
+    end
 
     def compose_subject(exception, kontroller=nil)
       subject = "#{@options[:email_prefix]}"

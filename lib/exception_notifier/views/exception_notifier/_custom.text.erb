@@ -1,0 +1,7 @@
+<%- if @custom_message -%>
+  <%= raw @custom_message %>
+<%- end -%>
+
+<%- if @custom_hash -%>
+  <%= raw @custom_hash.to_yaml %>
+<%- end -%>
