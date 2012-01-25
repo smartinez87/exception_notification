@@ -27,6 +27,7 @@ class ExceptionNotifier
 
     @options[:ignore_exceptions] ||= self.class.default_ignore_exceptions
     @options[:ignore_crawlers]   ||= self.class.default_ignore_crawlers
+    @options[:ignore_if]         ||= lambda { |e| false }
   end
 
   def call(env)
@@ -35,7 +36,9 @@ class ExceptionNotifier
     options = (env['exception_notifier.options'] ||= Notifier.default_options)
     options.reverse_merge!(@options)
 
-    unless ignored_exception(options[:ignore_exceptions], exception) || from_crawler(options[:ignore_crawlers], env['HTTP_USER_AGENT'])
+    unless ignored_exception(options[:ignore_exceptions], exception)       ||
+           from_crawler(options[:ignore_crawlers], env['HTTP_USER_AGENT']) ||
+           options[:ignore_if].call(exception)
       Notifier.exception_notification(env, exception).deliver
       env['exception_notifier.delivered'] = true
     end
