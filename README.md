@@ -120,7 +120,7 @@ To achieve that, you should use the _:ignore_exceptions_ option, like this:
       :email_prefix         => "[Whatever] ",
       :sender_address       => %{"notifier" <notifier@example.com>},
       :exception_recipients => %w{exceptions@example.com},
-      :ignore_exceptions    => %w{::ActionView::TemplateError} + ExceptionNotifier.default_ignore_exceptions
+      :ignore_exceptions    => [::ActionView::TemplateError] + ExceptionNotifier.default_ignore_exceptions
 
 The above will make ExceptionNotifier ignore a *TemplateError*
 exception, plus the ones ignored by default.
