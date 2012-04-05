@@ -4,9 +4,9 @@ require 'exception_notifier/notifier'
 class ExceptionNotifier
   def self.default_ignore_exceptions
     [].tap do |exceptions|
-      exceptions << ::ActiveRecord::RecordNotFound if defined? ::ActiveRecord::RecordNotFound
-      exceptions << ::AbstractController::ActionNotFound if defined? ::AbstractController::ActionNotFound
-      exceptions << ::ActionController::RoutingError if defined? ::ActionController::RoutingError
+      exceptions << 'ActiveRecord::RecordNotFound'
+      exceptions << 'AbstractController::ActionNotFound'
+      exceptions << 'ActionController::RoutingError'
     end
   end
 
@@ -49,7 +49,7 @@ class ExceptionNotifier
   private
 
   def ignored_exception(ignore_array, exception)
-    Array.wrap(ignore_array).include?(exception.class)
+    Array.wrap(ignore_array).map(&:to_s).include?(exception.class.name)
   end
 
   def from_crawler(ignore_array, agent)

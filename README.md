@@ -21,17 +21,21 @@ Installation
 You can use the latest ExceptionNotification gem with Rails 3, by adding
 the following line in your Gemfile
 
-    gem 'exception_notification'
+```ruby
+gem 'exception_notification'
+```
 
 As of Rails 3 ExceptionNotification is used as a rack middleware, so you can
 configure its options on your config.ru file, or in the environment you
 want it to run. In most cases you would want ExceptionNotification to
 run on production. You can make it work by
 
-    Whatever::Application.config.middleware.use ExceptionNotifier,
-      :email_prefix => "[Whatever] ",
-      :sender_address => %{"notifier" <notifier@example.com>},
-      :exception_recipients => %w{exceptions@example.com}
+```ruby
+Whatever::Application.config.middleware.use ExceptionNotifier,
+  :email_prefix => "[Whatever] ",
+  :sender_address => %{"notifier" <notifier@example.com>},
+  :exception_recipients => %w{exceptions@example.com}
+```
 
 Customization
 ---
@@ -44,12 +48,14 @@ sections are rendered by placing a partial named for that part in your
 app/views/exception_notifier directory (e.g., _session.rhtml). Each partial has
 access to the following variables:
 
-    @controller     # the controller that caused the error
-    @request        # the current request object
-    @exception      # the exception that was raised
-    @backtrace      # a sanitized version of the exception's backtrace
-    @data           # a hash of optional data values that were passed to the notifier
-    @sections       # the array of sections to include in the email
+```ruby
+@controller     # the controller that caused the error
+@request        # the current request object
+@exception      # the exception that was raised
+@backtrace      # a sanitized version of the exception's backtrace
+@data           # a hash of optional data values that were passed to the notifier
+@sections       # the array of sections to include in the email
+```
 
 Background views will not have access to @controller and @request.
 
@@ -58,28 +64,32 @@ ExceptionNotifier.sections variable. You can even add new sections that
 describe application-specific data--just add the section's name to the list
 (wherever you'd like), and define the corresponding partial.
 
-    #Example with two new added sections
-    Whatever::Application.config.middleware.use ExceptionNotifier,
-     :email_prefix => "[Whatever] ",
-     :sender_address => %{"notifier" <notifier@example.com>},
-     :exception_recipients => %w{exceptions@example.com},
-     :sections => %w{my_section1 my_section2} + ExceptionNotifier::Notifier.default_sections
+```ruby
+#Example with two new added sections
+Whatever::Application.config.middleware.use ExceptionNotifier,
+ :email_prefix => "[Whatever] ",
+ :sender_address => %{"notifier" <notifier@example.com>},
+ :exception_recipients => %w{exceptions@example.com},
+ :sections => %w{my_section1 my_section2} + ExceptionNotifier::Notifier.default_sections
+```
 
 If your new section requires information that isn't available by default, make sure
 it is made available to the email using the exception_data macro:
 
-    class ApplicationController < ActionController::Base
-      before_filter :log_additional_data
-      ...
-      protected
-        def log_additional_data
-          request.env["exception_notifier.exception_data"] = {
-            :document => @document,
-            :person => @person
-          }
-        end
-      ...
+```ruby
+class ApplicationController < ActionController::Base
+  before_filter :log_additional_data
+  ...
+  protected
+    def log_additional_data
+      request.env["exception_notifier.exception_data"] = {
+        :document => @document,
+        :person => @person
+      }
     end
+  ...
+end
+```
 
 In the above case, @document and @person would be made available to the email
 renderer, allowing your new section(s) to access and display them. See the
@@ -87,12 +97,14 @@ existing sections defined by the plugin for examples of how to write your own.
 
 You may want to include different sections for background notifications:
 
-    #Example with two new added sections
-    Whatever::Application.config.middleware.use ExceptionNotifier,
-     :email_prefix => "[Whatever] ",
-     :sender_address => %{"notifier" <notifier@example.com>},
-     :exception_recipients => %w{exceptions@example.com},
-     :background_sections => %w{my_section1 my_section2} + ExceptionNotifier::Notifier.default_background_sections
+```ruby
+#Example with two new added sections
+Whatever::Application.config.middleware.use ExceptionNotifier,
+ :email_prefix => "[Whatever] ",
+ :sender_address => %{"notifier" <notifier@example.com>},
+ :exception_recipients => %w{exceptions@example.com},
+ :background_sections => %w{my_section1 my_section2} + ExceptionNotifier::Notifier.default_background_sections
+```
 
 By default, the backtrace and data sections are included in background
 notifications.
@@ -103,11 +115,11 @@ You can choose to ignore certain exceptions, which will make
 ExceptionNotifier avoid sending notifications for those specified.
 There are three ways of specifying which exceptions to ignore:
 
-- :ignore_exceptions - By exception class (i.e. ignore RecordNotFound ones)
+- `:ignore_exceptions` - By exception class (i.e. ignore RecordNotFound ones)
 
-- :ignore_crawlers   - From crawler (i.e. ignore ones originated by Googlebot)
+- `:ignore_crawlers`   - From crawler (i.e. ignore ones originated by Googlebot)
 
-- :ignore_if         - Custom (i.e. ignore exceptions that satisfy some condition)
+- `:ignore_if`         - Custom (i.e. ignore exceptions that satisfy some condition)
 
 ---
 
@@ -116,11 +128,13 @@ There are three ways of specifying which exceptions to ignore:
 Ignore specified exception types.
 To achieve that, you should use the _:ignore_exceptions_ option, like this:
 
-     Whatever::Application.config.middleware.use ExceptionNotifier,
-      :email_prefix         => "[Whatever] ",
-      :sender_address       => %{"notifier" <notifier@example.com>},
-      :exception_recipients => %w{exceptions@example.com},
-      :ignore_exceptions    => [::ActionView::TemplateError] + ExceptionNotifier.default_ignore_exceptions
+```ruby
+Whatever::Application.config.middleware.use ExceptionNotifier,
+  :email_prefix         => "[Whatever] ",
+  :sender_address       => %{"notifier" <notifier@example.com>},
+  :exception_recipients => %w{exceptions@example.com},
+  :ignore_exceptions    => ['ActionView::TemplateError'] + ExceptionNotifier.default_ignore_exceptions
+```
 
 The above will make ExceptionNotifier ignore a *TemplateError*
 exception, plus the ones ignored by default.
@@ -133,11 +147,13 @@ _ActionController::RountingError_.
 In some cases you may want to avoid getting notifications from exceptions
 made by crawlers. Using _:ignore_crawlers_ option like this,
 
-     Whatever::Application.config.middleware.use ExceptionNotifier,
-      :email_prefix         => "[Whatever] ",
-      :sender_address       => %{"notifier" <notifier@example.com>},
-      :exception_recipients => %w{exceptions@example.com},
-      :ignore_crawlers      => %w{Googlebot bingbot}
+```ruby
+Whatever::Application.config.middleware.use ExceptionNotifier,
+  :email_prefix         => "[Whatever] ",
+  :sender_address       => %{"notifier" <notifier@example.com>},
+  :exception_recipients => %w{exceptions@example.com},
+  :ignore_crawlers      => %w{Googlebot bingbot}
+```
 
 will prevent sending those unwanted notifications.
 
@@ -145,11 +161,13 @@ will prevent sending those unwanted notifications.
 
 Last but not least, you can ignore exceptions based on a condition, by
 
-     Whatever::Application.config.middleware.use ExceptionNotifier,
-      :email_prefix         => "[Whatever] ",
-      :sender_address       => %{"notifier" <notifier@example.com>},
-      :exception_recipients => %w{exceptions@example.com},
-      :ignore_if            => lambda { |e| e.message =~ /^Couldn't find Page with ID=/ }
+```ruby
+Whatever::Application.config.middleware.use ExceptionNotifier,
+  :email_prefix         => "[Whatever] ",
+  :sender_address       => %{"notifier" <notifier@example.com>},
+  :exception_recipients => %w{exceptions@example.com},
+  :ignore_if            => lambda { |e| e.message =~ /^Couldn't find Page with ID=/ }
+```
 
 ### Verbose
 
@@ -170,21 +188,25 @@ If you want to send notifications from a background process like
 DelayedJob, you should use the background_exception_notification method
 like this:
 
-    begin
-      some code...
-    rescue => e
-      ExceptionNotifier::Notifier.background_exception_notification(e)
-    end
+```ruby
+begin
+  some code...
+rescue => e
+  ExceptionNotifier::Notifier.background_exception_notification(e)
+end
+```
 
 You can include information about the background process that created
 the error by including a data parameter:
 
-    begin
-      some code...
-    rescue => exception
-      ExceptionNotifier::Notifier.background_exception_notification(exception,
-        :data => {:worker => worker.to_s, :queue => queue, :payload => payload})
-    end
+```ruby
+begin
+  some code...
+rescue => exception
+  ExceptionNotifier::Notifier.background_exception_notification(exception,
+    :data => {:worker => worker.to_s, :queue => queue, :payload => payload})
+end
+```
 
 
 Manually notify of exception
@@ -193,14 +215,16 @@ Manually notify of exception
 If your controller action manually handles an error, the notifier will never be
 run. To manually notify of an error you can do something like the following:
 
-    rescue_from Exception, :with => :server_error
+```ruby
+rescue_from Exception, :with => :server_error
 
-    def server_error(exception)
-      # Whatever code that handles the exception
+def server_error(exception)
+  # Whatever code that handles the exception
 
-      ExceptionNotifier::Notifier.exception_notification(request.env, exception,
-        :data => {:message => "was doing something wrong"}).deliver
-    end
+  ExceptionNotifier::Notifier.exception_notification(request.env, exception,
+    :data => {:message => "was doing something wrong"}).deliver
+end
+```
 
 Notification
 ---

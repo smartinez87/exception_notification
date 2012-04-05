@@ -2,7 +2,7 @@ require 'test_helper'
 
 class ExceptionNotificationTest < ActiveSupport::TestCase
   test "should have default ignored exceptions" do
-    assert ExceptionNotifier.default_ignore_exceptions == [ActiveRecord::RecordNotFound, AbstractController::ActionNotFound, ActionController::RoutingError]
+    assert ExceptionNotifier.default_ignore_exceptions == ['ActiveRecord::RecordNotFound', 'AbstractController::ActionNotFound', 'ActionController::RoutingError']
   end
 
   test "should have default sender address overriden" do

@@ -60,7 +60,7 @@ class PostsControllerTest < ActionController::TestCase
       get :show, :id => @post.to_param + "10"
     rescue => e
       @ignored_exception = e
-      unless ExceptionNotifier.default_ignore_exceptions.include?(@ignored_exception.class)
+      unless ExceptionNotifier.default_ignore_exceptions.include?(@ignored_exception.class.name)
         @ignored_mail = ExceptionNotifier::Notifier.exception_notification(request.env, @ignored_exception)
       end
     end
