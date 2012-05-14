@@ -32,23 +32,23 @@ class PostsControllerTest < ActionController::TestCase
   end
 
   test "mail should contain backtrace in body" do
-    assert @mail.body.include? "`method_missing'\n  app/controllers/posts_controller.rb:17:in `create'\n"
+    assert @mail.encoded.include? "`method_missing'\r\n  app/controllers/posts_controller.rb:17:in `create'\r\n"
   end
 
   test "mail should contain timestamp of exception in body" do
-    assert @mail.body.include? "Timestamp : #{Time.current}"
+    assert @mail.encoded.include? "Timestamp : #{Time.current}"
   end
 
   test "mail should contain the newly defined section" do
-    assert @mail.body.include? "* New section for testing"
+    assert @mail.encoded.include? "* New section for testing"
   end
 
   test "mail should contain the custom message" do
-    assert @mail.body.include? "My Custom Message"
+    assert @mail.encoded.include? "My Custom Message"
   end
 
   test "should filter sensible data" do
-    assert @mail.body.include? "secret\"=>\"[FILTERED]"
+    assert @mail.encoded.include? "secret\"=>\"[FILTERED]"
   end
 
   test "mail should not contain any attachments" do
@@ -79,7 +79,7 @@ class PostsControllerTest < ActionController::TestCase
     end
 
     assert request.ssl?
-    assert @secured_mail.body.include? "* session id: [FILTERED]\n  *"
+    assert @secured_mail.encoded.include? "* session id: [FILTERED]\r\n  *"
   end
 
   test "should ignore exception if from unwanted cralwer" do
@@ -162,7 +162,7 @@ class PostsControllerTestBadRequestData < ActionController::TestCase
   end
 
   test "should include error message in body" do
-    assert_match /ERROR: Failed to generate exception summary/, @mail.body.to_s
+    assert_match /ERROR: Failed to generate exception summary/, @mail.encoded.to_s
   end
 end
 
@@ -178,6 +178,6 @@ class PostsControllerTestBackgroundNotification < ActionController::TestCase
   end
 
   test "mail should contain the specified section" do
-    assert @mail.body.include? "* New background section for testing"
+    assert @mail.encoded.include? "* New background section for testing"
   end
 end

@@ -52,7 +52,8 @@ class ExceptionNotifier
           :sections => default_sections,
           :background_sections => default_background_sections,
           :verbose_subject => default_verbose_subject,
-          :normalize_subject => default_normalize_subject }
+          :normalize_subject => default_normalize_subject,
+          :template_path => mailer_name }
       end
 
       def normalize_digits(string)
@@ -83,9 +84,13 @@ class ExceptionNotifier
       end
       subject = compose_subject(exception, @kontroller)
 
-      mail(:to => @options[:exception_recipients], :from => @options[:sender_address], :subject => subject) do |format|
-        format.text { render "#{mailer_name}/exception_notification" }
-      end
+      mail(:to => @options[:exception_recipients],
+           :from => @options[:sender_address],
+           :subject => subject,
+           :template_name => 'exception_notification') do |format|
+             format.text
+             format.html
+           end
     end
 
     def background_exception_notification(exception, options={})
@@ -103,9 +108,13 @@ class ExceptionNotifier
         end
         subject  = compose_subject(exception)
 
-        mail(:to => @options[:exception_recipients], :from => @options[:sender_address], :subject => subject) do |format|
-          format.text { render "#{mailer_name}/background_exception_notification" }
-        end.deliver
+        mail(:to => @options[:exception_recipients], 
+             :from => @options[:sender_address], 
+             :subject => subject,
+             :template_name => 'background_exception_notification') do |format|
+               format.text
+               format.html
+             end.deliver
       end
     end
 

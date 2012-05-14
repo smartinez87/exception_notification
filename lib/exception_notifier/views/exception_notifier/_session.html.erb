@@ -1,0 +1,2 @@
+* session id: <%= @request.ssl? ? "[FILTERED]" : (raw (@request.session['session_id'] || @request.env["rack.session.options"][:id]).inspect.html_safe) %>
+* data: <%= raw PP.pp(@request.session, "") %>
