@@ -40,6 +40,17 @@ class BackgroundExceptionNotificationTest < ActiveSupport::TestCase
     assert @mail.encoded.include? "A ZeroDivisionError occurred in background at #{@time}"
   end
 
+  test "mail should prefix exception class with 'an' instead of 'a' when it starts with a vowel" do
+    begin
+      raise ActiveRecord::RecordNotFound
+    rescue => e
+      @vowel_exception = e
+      @vowel_mail = ExceptionNotifier::Notifier.background_exception_notification(@vowel_exception)
+    end
+
+    assert @vowel_mail.encoded.include? "An ActiveRecord::RecordNotFound occurred in background at #{@time}"
+  end
+
   test "mail should contain backtrace in body" do
     assert @mail.encoded.include?("test/background_exception_notification_test.rb:6"), "\n#{@mail.inspect}"
   end

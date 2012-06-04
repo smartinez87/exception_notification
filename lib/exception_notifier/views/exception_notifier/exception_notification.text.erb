@@ -1,4 +1,4 @@
-A <%= @exception.class %> occurred in <%= @kontroller.controller_name %>#<%= @kontroller.action_name %>:
+<%= @exception.class.to_s =~ /^[aeiou]/i ? 'An' : 'A' %> <%= @exception.class %> occurred in <%= @kontroller.controller_name %>#<%= @kontroller.action_name %>:
 
   <%= raw @exception.message %>
   <%= raw @backtrace.first %>

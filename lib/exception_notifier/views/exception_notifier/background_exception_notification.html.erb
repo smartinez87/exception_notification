@@ -6,7 +6,7 @@
   </head>
   <body>
     <pre style="font-size: 12px">
-A <%= @exception.class %> occurred in background at <%= raw Time.current %> :
+<%= @exception.class.to_s =~ /^[aeiou]/i ? 'An' : 'A' %> <%= @exception.class %> occurred in background at <%= raw Time.current %> :
 
 <%= @exception.message %>
 <%= @backtrace.first %>
