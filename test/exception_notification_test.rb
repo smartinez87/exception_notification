@@ -5,21 +5,38 @@ class ExceptionNotificationTest < ActiveSupport::TestCase
     assert ExceptionNotifier.default_ignore_exceptions == ['ActiveRecord::RecordNotFound', 'AbstractController::ActionNotFound', 'ActionController::RoutingError']
   end
 
-  test "should have default sender address overriden" do
+  test "should have default sender address overridden" do
     assert ExceptionNotifier::Notifier.default_sender_address == %("Dummy Notifier" <dummynotifier@example.com>)
   end
 
-  test "should have default email prefix overriden" do
+  test "should have default email prefix overridden" do
     assert ExceptionNotifier::Notifier.default_email_prefix == "[Dummy ERROR] "
   end
 
-  test "should have default email format overriden" do
+  test "should have default email format overridden" do
     assert ExceptionNotifier::Notifier.default_email_format == :text
   end
 
   test "should have default sections" do
     for section in %w(request session environment backtrace)
       assert ExceptionNotifier::Notifier.default_sections.include? section
+    end
+  end
+
+  test "should have default section overridden" do
+    begin
+      test_string = '--- this is a test ---'
+      env = {}
+      exception = StandardError.new("Test Error")
+      options = {:sections => %w(environment)}
+
+      section_partial = Rails.root.join('app', 'views', 'exception_notifier', '_environment.text.erb')
+
+      File.open(section_partial, 'w+') { |f| f.puts test_string }
+
+      assert ExceptionNotifier::Notifier.exception_notification(env, exception, options).body =~ /#{test_string}/
+    ensure
+      File.delete section_partial
     end
   end
 

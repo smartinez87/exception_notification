@@ -73,11 +73,11 @@ class ExceptionNotifier
     end
 
     def exception_notification(env, exception, options={})
-      self.append_view_path Rails.root.nil? ? "app/views" : "#{Rails.root}/app/views" if defined?(Rails)
+      self.prepend_view_path Rails.root.nil? ? "app/views" : "#{Rails.root}/app/views" if defined?(Rails)
 
       @env        = env
       @exception  = exception
-      @options    = (env['exception_notifier.options'] || {}).reverse_merge(self.class.default_options)
+      @options    = options.reverse_merge(env['exception_notifier.options'] || {}).reverse_merge(self.class.default_options)
       @kontroller = env['action_controller.instance'] || MissingController.new
       @request    = ActionDispatch::Request.new(env)
       @backtrace  = exception.backtrace ? clean_backtrace(exception) : []
@@ -98,10 +98,10 @@ class ExceptionNotifier
     end
 
     def background_exception_notification(exception, options={})
-      self.append_view_path Rails.root.nil? ? "app/views" : "#{Rails.root}/app/views" if defined?(Rails)
+      self.prepend_view_path Rails.root.nil? ? "app/views" : "#{Rails.root}/app/views" if defined?(Rails)
 
       if @notifier = Rails.application.config.middleware.detect{ |x| x.klass == ExceptionNotifier }
-        @options   = (@notifier.args.first || {}).reverse_merge(self.class.default_options)
+        @options   = options.reverse_merge(@notifier.args.first || {}).reverse_merge(self.class.default_options)
         @exception = exception
         @backtrace = exception.backtrace || []
         @sections  = @options[:background_sections]
