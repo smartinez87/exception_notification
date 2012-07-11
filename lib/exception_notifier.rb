@@ -25,6 +25,7 @@ class ExceptionNotifier
     Notifier.default_background_sections  = @options[:background_sections]
     Notifier.default_verbose_subject      = @options[:verbose_subject]
     Notifier.default_normalize_subject    = @options[:normalize_subject]
+    Notifier.default_smtp_settings        = @options[:smtp_settings]
 
     @options[:ignore_exceptions] ||= self.class.default_ignore_exceptions
     @options[:ignore_crawlers]   ||= self.class.default_ignore_crawlers
@@ -40,7 +41,9 @@ class ExceptionNotifier
     unless ignored_exception(options[:ignore_exceptions], exception)       ||
            from_crawler(options[:ignore_crawlers], env['HTTP_USER_AGENT']) ||
            conditionally_ignored(options[:ignore_if], env, exception)
-      Notifier.exception_notification(env, exception).deliver
+      mail = Notifier.exception_notification(env, exception)
+      mail.delivery_method.settings.merge!(options[:smtp_settings]) if options[:smtp_settings]
+      mail.deliver
       env['exception_notifier.delivered'] = true
     end
 
