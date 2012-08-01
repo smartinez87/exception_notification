@@ -71,6 +71,7 @@ class ExceptionNotifier
       @env        = env
       @exception  = exception
       @options    = (env['exception_notifier.options'] || {}).reverse_merge(self.class.default_options)
+      @options[:email_prefix] = options[:email_prefix] if options[:email_prefix].present?
       @kontroller = env['action_controller.instance'] || MissingController.new
       @request    = ActionDispatch::Request.new(env)
       @backtrace  = exception.backtrace ? clean_backtrace(exception) : []
