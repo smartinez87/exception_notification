@@ -94,6 +94,7 @@ class ExceptionNotifier
 
       if @notifier = Rails.application.config.middleware.detect{ |x| x.klass == ExceptionNotifier }
         @options   = (@notifier.args.first || {}).reverse_merge(self.class.default_options)
+        @options[:email_prefix] = options[:email_prefix] if options[:email_prefix].present?
         @exception = exception
         @backtrace = exception.backtrace || []
         @sections  = @options[:background_sections]
