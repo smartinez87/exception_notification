@@ -162,6 +162,35 @@ class PostsControllerTestWithoutVerboseSubject < ActionController::TestCase
   end
 end
 
+class PostsControllerTestWithSmtpSettings < ActionController::TestCase
+  tests PostsController
+  setup do
+    ExceptionNotifier::Notifier.default_smtp_settings = {
+      :user_name => "Dummy user_name",
+      :password => "Dummy password"
+    }
+    
+    begin
+      @post = posts(:one)
+      post :create, :post => @post.attributes
+    rescue => e
+      @exception = e
+      @mail = ExceptionNotifier::Notifier.exception_notification(request.env, @exception)
+    end
+  end
+
+  test "should have overridden smtp settings" do
+    assert_equal "Dummy user_name", @mail.delivery_method.settings[:user_name]
+    assert_equal "Dummy password", @mail.delivery_method.settings[:password]
+  end
+  
+  test "should have overridden smtp settings with background notification" do
+    @mail = ExceptionNotifier::Notifier.background_exception_notification(@exception)
+    assert_equal "Dummy user_name", @mail.delivery_method.settings[:user_name]
+    assert_equal "Dummy password", @mail.delivery_method.settings[:password]
+  end
+end
+
 class PostsControllerTestBadRequestData < ActionController::TestCase
   tests PostsController
   setup do

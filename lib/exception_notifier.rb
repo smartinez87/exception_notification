@@ -27,6 +27,7 @@ class ExceptionNotifier
     Notifier.default_background_sections  = @options[:background_sections]
     Notifier.default_verbose_subject      = @options[:verbose_subject]
     Notifier.default_normalize_subject    = @options[:normalize_subject]
+    Notifier.default_smtp_settings        = @options[:smtp_settings]
 
     @campfire = CampfireNotifier.new @options[:campfire]
 

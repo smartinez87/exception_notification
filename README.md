@@ -257,6 +257,23 @@ Notification
 After an exception notification has been delivered the rack environment variable
 'exception_notifier.delivered' will be set to `true`.
 
+
+Override SMTP settings
+---
+
+You can use specific SMTP settings for notifications:
+
+```ruby
+Whatever::Application.config.middleware.use ExceptionNotifier,
+  :email_prefix         => "[Whatever] ",
+  :sender_address       => %{"notifier" <notifier@example.com>},
+  :exception_recipients => %w{exceptions@example.com},
+  :smtp_settings => {
+    :user_name => "bob",
+    :password => "password",
+  }
+```
+
 Versions
 ---
 

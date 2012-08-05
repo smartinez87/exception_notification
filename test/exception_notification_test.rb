@@ -62,4 +62,8 @@ class ExceptionNotificationTest < ActiveSupport::TestCase
   test "should have normalize_subject false by default" do
     assert ExceptionNotifier::Notifier.default_options[:normalize_subject] == false
   end
+  
+  test "should have smtp_settings nil by default" do
+    assert ExceptionNotifier::Notifier.default_options[:smtp_settings] == nil
+  end
 end
