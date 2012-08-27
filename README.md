@@ -90,6 +90,9 @@ Whatever::Application.config.middleware.use ExceptionNotifier,
  :sections => %w{my_section1 my_section2} + ExceptionNotifier::Notifier.default_sections
 ```
 
+Place your custom sections under `./app/views/exception_notifier/` with the suffix `.text.erb`, e.g. 
+`./app/views/exception_notifier/_my_section1.text.erb`.
+
 If your new section requires information that isn't available by default, make sure
 it is made available to the email using the exception_data macro:
 
