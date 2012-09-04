@@ -8,11 +8,10 @@ class ExceptionNotifier
     attr_accessor :password
 
     def initialize(options)
-      begin
-        site = options.delete(:site)
-        project_identifier = options.delete(:project_identifier)
-        user = options.delete(:user)
-        password = options.delete(:password)
+	    site = options.delete(:site)
+	    project_identifier = options.delete(:project_identifier)
+	    user = options.delete(:user)
+	    password = options.delete(:password)
 
 		create_class('Issue', ActiveResource::Base) do
 			self.site = site
