@@ -1,6 +1,7 @@
 require 'action_dispatch'
 require 'exception_notifier/notifier'
 require 'exception_notifier/campfire_notifier'
+require 'exception_notifier/redmine_notifier'
 
 class ExceptionNotifier
 
@@ -30,6 +31,7 @@ class ExceptionNotifier
     Notifier.default_smtp_settings        = @options[:smtp_settings]
 
     @campfire = CampfireNotifier.new @options[:campfire]
+    @redmine = RedmineNotifier.new @options[:redmine]
 
     @options[:ignore_exceptions] ||= self.class.default_ignore_exceptions
     @options[:ignore_crawlers]   ||= self.class.default_ignore_crawlers
@@ -47,6 +49,7 @@ class ExceptionNotifier
            conditionally_ignored(options[:ignore_if], env, exception)
       Notifier.exception_notification(env, exception).deliver
       @campfire.exception_notification(exception)
+      @redmine.exception_notification(exception)
       env['exception_notifier.delivered'] = true
     end
 
