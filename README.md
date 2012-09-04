@@ -64,7 +64,7 @@ Whatever::Application.config.middleware.use ExceptionNotifier,
   :email_prefix => "[Whatever] ",
   :sender_address => %{"notifier" <notifier@example.com>},
   :exception_recipients => %w{exceptions@example.com},
-  :redmine => {:site => 'http://redmine.example.com', :project_identifier => 'my_project', :user => 'user', :password => 'password'}
+  :redmine => {:site => 'http://redmine.example.com/', :project_identifier => 'my_project', :user => 'user', :password => 'password'}
 ```
 
 Customization
