@@ -32,11 +32,16 @@ class ExceptionNotifier
 
     def exception_notification(exception)
 		if active?
-			issue = Issue.new(
-				:subject => exception.message,
-				:project_id => @project.id,
-			)
-			issue.save
+			# check if we allready have an exception for this case
+			issue = Issue.find(:first, :params => { :subject => exception.message })
+			if !issue # if not create new ticket for the exception
+				issue = Issue.new(
+					:subject => exception.message,
+					:project_id => @project.id,
+					:description => exception.backtrace
+				)
+				issue.save
+			end
 		end
     end
 
