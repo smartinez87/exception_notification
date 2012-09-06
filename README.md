@@ -66,7 +66,7 @@ app/views/exception_notifier directory (e.g., _session.rhtml). Each partial has
 access to the following variables:
 
 ```ruby
-@controller     # the controller that caused the error
+@kontroller     # the controller that caused the error
 @request        # the current request object
 @exception      # the exception that was raised
 @backtrace      # a sanitized version of the exception's backtrace
@@ -74,7 +74,7 @@ access to the following variables:
 @sections       # the array of sections to include in the email
 ```
 
-Background views will not have access to @controller and @request.
+Background views will not have access to @kontroller and @request.
 
 You can reorder the sections, or exclude sections completely, by altering the
 ExceptionNotifier.sections variable. You can even add new sections that
