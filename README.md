@@ -54,6 +54,19 @@ Whatever::Application.config.middleware.use ExceptionNotifier,
 For more options to set Campfire, like _ssl_, check
 [here](https://github.com/collectiveidea/tinder/blob/master/lib/tinder/campfire.rb#L17).
 
+Additionally, ExceptionNotification supports Redmine integration, so
+you can create tickets for occuring exceptions.
+To configure it, you need to set the site, project_identifier, user, password,
+like this
+
+```ruby
+Whatever::Application.config.middleware.use ExceptionNotifier,
+  :email_prefix => "[Whatever] ",
+  :sender_address => %{"notifier" <notifier@example.com>},
+  :exception_recipients => %w{exceptions@example.com},
+  :redmine => {:site => 'http://redmine.example.com/', :project_identifier => 'my_project', :user => 'user', :password => 'password'}
+```
+
 Customization
 ---
 
