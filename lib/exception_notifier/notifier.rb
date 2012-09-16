@@ -2,6 +2,22 @@ require 'action_mailer'
 require 'pp'
 
 class ExceptionNotifier
+  class BackgroundNotifier
+    def self.exception_notification(exception, options={})
+      if @notifier = Rails.application.config.middleware.detect{ |x| x.klass == ExceptionNotifier }
+        @options   = options.reverse_merge(@notifier.args.first || {}).reverse_merge(Notifier.default_options)
+        return if ignored_exception(@options[:ignore_exceptions], exception)
+        Notifier.background_exception_notification(exception, options)
+      end
+    end
+
+    private
+
+    def self.ignored_exception(ignore_array, exception)
+      Array.wrap(ignore_array).map(&:to_s).include?(exception.class.name)
+    end
+  end
+
   class Notifier < ActionMailer::Base
     self.mailer_name = 'exception_notifier'
 
@@ -90,7 +106,7 @@ class ExceptionNotifier
       @sections   = @options[:sections]
       @data       = (env['exception_notifier.exception_data'] || {}).merge(options[:data] || {})
       @sections   = @sections + %w(data) unless @data.empty?
-      
+
       compose_email
     end
 
@@ -160,9 +176,9 @@ class ExceptionNotifier
         format.text
         format.html if html_mail?
       end
-      
+
       mail.delivery_method.settings.merge!(@options[:smtp_settings]) if @options[:smtp_settings]
-      
+
       mail
     end
 
