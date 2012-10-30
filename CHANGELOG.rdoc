@@ -2,7 +2,7 @@
 
 * enhancements
   * Campfire integration
-  * Support fot HTML notifications (by @Xenofex)
+  * Support for HTML notifications (by @Xenofex)
   * Be able to override SMTP settings (by @piglop and @Macint)
 
 * bug fixes
