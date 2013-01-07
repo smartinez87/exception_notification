@@ -40,8 +40,16 @@ Campfire Integration
 
 Additionally, ExceptionNotification supports sending notifications to
 your Campfire room.
+
+First you'll need to add [tinder](https://github.com/collectiveidea/tinder)
+to your `Gemfile`:
+
+```ruby
+gem 'tinder', '~> 1.8'
+```
+
 To configure it, you need to set the subdomain, token and room name,
-like this
+like this:
 
 ```ruby
 Whatever::Application.config.middleware.use ExceptionNotifier,
@@ -90,7 +98,7 @@ Whatever::Application.config.middleware.use ExceptionNotifier,
  :sections => %w{my_section1 my_section2} + ExceptionNotifier::Notifier.default_sections
 ```
 
-Place your custom sections under `./app/views/exception_notifier/` with the suffix `.text.erb`, e.g. 
+Place your custom sections under `./app/views/exception_notifier/` with the suffix `.text.erb`, e.g.
 `./app/views/exception_notifier/_my_section1.text.erb`.
 
 If your new section requires information that isn't available by default, make sure

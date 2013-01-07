@@ -1,6 +1,6 @@
 class ExceptionNotifier
   class CampfireNotifier
-    require 'tinder'
+    cattr_accessor :tinder_available, true
 
     attr_accessor :subdomain
     attr_accessor :token
@@ -8,6 +8,8 @@ class ExceptionNotifier
 
     def initialize(options)
       begin
+        return unless tinder_available
+
         subdomain = options.delete(:subdomain)
         room_name = options.delete(:room_name)
         @campfire = Tinder::Campfire.new subdomain, options
@@ -27,4 +29,10 @@ class ExceptionNotifier
       !@room.nil?
     end
   end
+end
+
+begin
+  require 'tinder'
+rescue LoadError
+  ExceptionNotifier::CampfireNotifier.tinder_available = false
 end

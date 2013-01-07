@@ -3,7 +3,6 @@ PATH
   specs:
     exception_notification (3.0.0)
       actionmailer (>= 3.0.4)
-      tinder (~> 1.8)
 
 GEM
   remote: http://rubygems.org/
@@ -116,3 +115,4 @@ DEPENDENCIES
   exception_notification!
   rails (= 3.2.8)
   sqlite3
+  tinder
