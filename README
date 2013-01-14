@@ -21,7 +21,7 @@ to generate error emails (typically ApplicationController):
     ...
   end
 
-Then, specify the email recipients in your environment:
+Then, specify the email recipients in your environment.rb
 
   ExceptionNotification::Notifier.exception_recipients = %w(joe@schmoe.com bill@schmoe.com)
 
