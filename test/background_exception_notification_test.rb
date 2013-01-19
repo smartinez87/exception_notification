@@ -71,9 +71,7 @@ class BackgroundExceptionNotificationTest < ActiveSupport::TestCase
       raise ActiveRecord::RecordNotFound
     rescue => e
       @ignored_exception = e
-      unless ExceptionNotifier.default_ignore_exceptions.include?(@ignored_exception.class.name)
-        @ignored_mail = ExceptionNotifier::Notifier.background_exception_notification(@ignored_exception)
-      end
+      @ignored_mail = ExceptionNotifier::BackgroundNotifier.exception_notification(@ignored_exception)
     end
 
     assert @ignored_exception.class.inspect == "ActiveRecord::RecordNotFound"
