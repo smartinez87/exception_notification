@@ -17,6 +17,10 @@ class ExceptionNotificationTest < ActiveSupport::TestCase
     assert ExceptionNotifier::Notifier.default_email_format == :text
   end
 
+  test "should have default email headers overridden" do
+    asset ExceptionNotifier::Notifier.default_email_headers == { "X-Custom-Header" => "foobar"}
+  end
+
   test "should have default sections" do
     for section in %w(request session environment backtrace)
       assert ExceptionNotifier::Notifier.default_sections.include? section

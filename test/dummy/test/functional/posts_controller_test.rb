@@ -59,6 +59,10 @@ class PostsControllerTest < ActionController::TestCase
     assert @mail.encoded.include? "secret\"=>\"[FILTERED]"
   end
 
+  test "mail should contain the custom header" do
+    assert @mail.headers["X-Custom-Header"] == "foobar"
+  end
+
   test "mail should not contain any attachments" do
     assert @mail.attachments == []
   end

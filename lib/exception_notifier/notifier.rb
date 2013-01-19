@@ -18,6 +18,7 @@ class ExceptionNotifier
       attr_writer :default_verbose_subject
       attr_writer :default_normalize_subject
       attr_writer :default_smtp_settings
+      attr_writer :default_email_headers
 
       def default_sender_address
         @default_sender_address || %("Exception Notifier" <exception.notifier@default.com>)
@@ -55,6 +56,10 @@ class ExceptionNotifier
         @default_smtp_settings || nil
       end
 
+      def default_email_headers
+        @default_email_headers || {}
+      end
+
       def default_options
         { :sender_address => default_sender_address,
           :exception_recipients => default_exception_recipients,
@@ -65,7 +70,8 @@ class ExceptionNotifier
           :verbose_subject => default_verbose_subject,
           :normalize_subject => default_normalize_subject,
           :template_path => mailer_name,
-          :smtp_settings => default_smtp_settings }
+          :smtp_settings => default_smtp_settings,
+          :email_headers => default_email_headers }
       end
 
       def normalize_digits(string)
@@ -155,8 +161,14 @@ class ExceptionNotifier
       subject = compose_subject
       name = @env.nil? ? 'background_exception_notification' : 'exception_notification'
 
-      mail = mail(:to => @options[:exception_recipients], :from => @options[:sender_address],
-           :subject => subject, :template_name => name) do |format|
+      headers = {
+        :to => @options[:exception_recipients], 
+        :from => @options[:sender_address],
+        :subject => subject, 
+        :template_name => name
+      }.merge(@options[:email_headers])
+
+      mail = mail(headers) do |format|
         format.text
         format.html if html_mail?
       end
