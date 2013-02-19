@@ -6,7 +6,7 @@ require 'rake/testtask'
 task 'setup_dummy_app' do
   unless File.exists? "test/dummy/db/test.sqlite3"
     Bundler.with_clean_env do
-      sh "cd test/dummy; bundle; rake db:migrate; rake db:test:prepare; cd ../../;"
+      sh "cd test/dummy; bundle; bundle exec rake db:migrate db:test:prepare; cd ../../;"
     end
   end
 end
