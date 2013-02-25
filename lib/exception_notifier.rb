@@ -43,10 +43,11 @@ class ExceptionNotifier
     options = (env['exception_notifier.options'] ||= Notifier.default_options)
     options.reverse_merge!(@options)
 
-    unless ignored_exception(options[:ignore_exceptions], exception)       ||
+    unless ignored_exception(options[:ignore_exceptions], exception) ||
            from_crawler(options[:ignore_crawlers], env['HTTP_USER_AGENT']) ||
            conditionally_ignored(options[:ignore_if], env, exception)
-      Notifier.exception_notification(env, exception).deliver
+
+      exception_notification(env, exception)
       @campfire.exception_notification(exception)
       env['exception_notifier.delivered'] = true
     end
@@ -55,6 +56,11 @@ class ExceptionNotifier
   end
 
   private
+
+  def exception_notification(env, exception)
+    notifier_proc ||= @options[:notifier_proc] ||= ->(env, exception) { Notifier.exception_notification(env, exception).deliver }
+    notifier_proc.call(env, exception)
+  end
 
   def ignored_exception(ignore_array, exception)
     Array.wrap(ignore_array).map(&:to_s).include?(exception.class.name)
