@@ -63,6 +63,10 @@ class PostsControllerTest < ActionController::TestCase
     assert @mail.encoded.include? 'X-Custom-Header: foobar'
   end
 
+  test "mail should contain the data added by the custom notifier_proc" do
+    assert @mail.encoded.include? 'ciao'
+  end
+
   test "mail should not contain any attachments" do
     assert @mail.attachments == []
   end
