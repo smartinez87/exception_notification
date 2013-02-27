@@ -64,7 +64,6 @@ class PostsControllerTest < ActionController::TestCase
   end
 
   test "mail should contain the data added by the custom notifier_proc" do
-    puts @mail.encoded
     assert @mail.encoded.include? 'ciao'
   end
 
