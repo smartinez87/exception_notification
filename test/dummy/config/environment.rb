@@ -7,7 +7,10 @@ Dummy::Application.config.middleware.use ExceptionNotifier,
   :exception_recipients => %w{dummyexceptions@example.com},
   :email_headers => { "X-Custom-Header" => "foobar" },
   :sections => ['new_section', 'request', 'session', 'environment', 'backtrace'],
-  :background_sections => %w(new_bkg_section) + ExceptionNotifier::Notifier.default_background_sections
+  :background_sections => %w(new_bkg_section) + ExceptionNotifier::Notifier.default_background_sections,
+  :notifier_proc => lambda { |env, e|
+    Notifier.exception_notification(env, e, data: {ciao: 'ola'}).deliver
+  }
 
 # Initialize the rails application
 Dummy::Application.initialize!

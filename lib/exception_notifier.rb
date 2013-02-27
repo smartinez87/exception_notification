@@ -35,7 +35,7 @@ class ExceptionNotifier
     @options[:ignore_exceptions] ||= self.class.default_ignore_exceptions
     @options[:ignore_crawlers]   ||= self.class.default_ignore_crawlers
     @options[:ignore_if]         ||= lambda { |env, e| false }
-    @options[:notifier_proc]     ||= ->(env, exception) { Notifier.exception_notification(env, exception).deliver }
+    @options[:notifier_proc]     ||= lambda { |env, e| Notifier.exception_notification(env, e).deliver }
   end
 
   def call(env)
