@@ -33,7 +33,8 @@ class BackgroundExceptionNotificationTest < ActiveSupport::TestCase
   end
 
   test "mail should have a descriptive subject" do
-    assert @mail.subject == "[Dummy ERROR]  (ZeroDivisionError) \"divided by 0\""
+    # subject reads "divided by N" and not "divided by 0" becuase the normalize_subject setting is set
+    assert @mail.subject == "[Dummy ERROR]  (ZeroDivisionError) \"divided by N\""
   end
 
   test "mail should say exception was raised in background at show timestamp" do

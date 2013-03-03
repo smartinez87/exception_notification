@@ -121,7 +121,7 @@ class ExceptionNotifier
       subject << "#{@kontroller.controller_name}##{@kontroller.action_name}" if @kontroller
       subject << " (#{@exception.class})"
       subject << " #{@exception.message.inspect}" if @options[:verbose_subject]
-      subject = normalize_digits(subject) if @options[:normalize_subject]
+      subject = self.class.normalize_digits(subject) if @options[:normalize_subject]
       subject.length > 120 ? subject[0...120] + "..." : subject
     end
 
