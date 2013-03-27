@@ -35,6 +35,26 @@ Whatever::Application.config.middleware.use ExceptionNotifier,
   :exception_recipients => %w{exceptions@example.com}
 ```
 
+ActionMailer Configuration
+---
+
+For the email to be sent, there must be a default ActionMailer delivery_method setting configured. 
+If you do not have one, you can use the following code (assuming your app server machine has sendmail). 
+Depending on the environment you want ExceptionNotification to run in, put the following code in your
+config/production.rb and/or config/development.rb:
+
+```ruby
+config.action_mailer.delivery_method = :sendmail
+# Defaults to:
+# config.action_mailer.sendmail_settings = {
+#   :location => '/usr/sbin/sendmail',
+#   :arguments => '-i -t'
+# }
+config.action_mailer.perform_deliveries = true
+config.action_mailer.raise_delivery_errors = true
+```
+
+
 Campfire Integration
 ---
 
