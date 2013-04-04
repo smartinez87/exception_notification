@@ -2,12 +2,13 @@ require 'test_helper'
 
 class PostsControllerTest < ActionController::TestCase
   setup do
+    @email_notifier = ExceptionNotifier.registered_exception_notifier(:email)
     begin
       @post = posts(:one)
       post :create, :post => @post.attributes
     rescue => e
       @exception = e
-      @mail = ExceptionNotifier::Notifier.exception_notification(request.env, @exception, {:data => {:message => 'My Custom Message'}})
+      @mail = @email_notifier.create_email(@exception, {:env => request.env, :data => {:message => 'My Custom Message'}})
     end
   end
 
@@ -73,7 +74,7 @@ class PostsControllerTest < ActionController::TestCase
     rescue => e
       @ignored_exception = e
       unless ExceptionNotifier.default_ignore_exceptions.include?(@ignored_exception.class.name)
-        @ignored_mail = ExceptionNotifier::Notifier.exception_notification(request.env, @ignored_exception)
+        @ignored_mail = @email_notifier.create_email(@ignored_exception, {:env => request.env})
       end
     end
 
@@ -87,7 +88,7 @@ class PostsControllerTest < ActionController::TestCase
       @post = posts(:one)
       post :create, :post => @post.attributes
     rescue => e
-      @secured_mail = ExceptionNotifier::Notifier.exception_notification(request.env, e)
+      @secured_mail = @email_notifier.create_email(e, {:env => request.env})
     end
 
     assert request.ssl?
@@ -106,7 +107,7 @@ class PostsControllerTest < ActionController::TestCase
       custom_env['exception_notifier.options'].merge!(:ignore_crawlers => %w(Googlebot))
       ignore_array = custom_env['exception_notifier.options'][:ignore_crawlers]
       unless ExceptionNotifier.new(Dummy::Application, custom_env['exception_notifier.options']).send(:from_crawler, ignore_array, custom_env['HTTP_USER_AGENT'])
-        @ignored_mail = ExceptionNotifier::Notifier.exception_notification(custom_env, @exception)
+        @ignored_mail = @email_notifier.create_email(@exception, {:env => custom_env})
       end
     end
 
@@ -125,7 +126,7 @@ class PostsControllerTest < ActionController::TestCase
       ignore_cond = {:ignore_if => lambda {|env, e| (env['IGNOREME'] == 'IGNOREME') && (e.message =~ /undefined method/)}}
       custom_env['exception_notifier.options'].merge!(ignore_cond)
       unless ExceptionNotifier.new(Dummy::Application, custom_env['exception_notifier.options']).send(:conditionally_ignored, ignore_cond[:ignore_if], custom_env, @exception)
-        @ignored_mail = ExceptionNotifier::Notifier.exception_notification(custom_env, @exception)
+        @ignored_mail = @email_notifier.create_email(@exception, {:env => custom_env})
       end
     end
 
@@ -141,7 +142,7 @@ class PostsControllerTest < ActionController::TestCase
       custom_env = request.env
       custom_env['exception_notifier.options'] ||= {}
       custom_env['exception_notifier.options'].merge!({:email_format => :html})
-      @mail = ExceptionNotifier::Notifier.exception_notification(custom_env, @exception)
+      @mail = @email_notifier.create_email(@exception, {:env => custom_env})
     end
 
     assert @mail.content_type.include? "multipart/alternative"
@@ -151,13 +152,13 @@ end
 class PostsControllerTestWithoutVerboseSubject < ActionController::TestCase
   tests PostsController
   setup do
-    ExceptionNotifier::Notifier.default_verbose_subject = false
+    @email_notifier = ExceptionNotifier::EmailNotifier.new(:verbose_subject => false)
     begin
       @post = posts(:one)
       post :create, :post => @post.attributes
     rescue => e
       @exception = e
-      @mail = ExceptionNotifier::Notifier.exception_notification(request.env, @exception)
+      @mail = @email_notifier.create_email(@exception, {:env => request.env})
     end
   end
 
@@ -169,17 +170,17 @@ end
 class PostsControllerTestWithSmtpSettings < ActionController::TestCase
   tests PostsController
   setup do
-    ExceptionNotifier::Notifier.default_smtp_settings = {
+    @email_notifier = ExceptionNotifier::EmailNotifier.new(:smtp_settings => {
       :user_name => "Dummy user_name",
       :password => "Dummy password"
-    }
-    
+    })
+
     begin
       @post = posts(:one)
       post :create, :post => @post.attributes
     rescue => e
       @exception = e
-      @mail = ExceptionNotifier::Notifier.exception_notification(request.env, @exception)
+      @mail = @email_notifier.create_email(@exception, {:env => request.env})
     end
   end
 
@@ -187,9 +188,9 @@ class PostsControllerTestWithSmtpSettings < ActionController::TestCase
     assert_equal "Dummy user_name", @mail.delivery_method.settings[:user_name]
     assert_equal "Dummy password", @mail.delivery_method.settings[:password]
   end
-  
+
   test "should have overridden smtp settings with background notification" do
-    @mail = ExceptionNotifier::Notifier.background_exception_notification(@exception)
+    @mail = @email_notifier.create_email(@exception)
     assert_equal "Dummy user_name", @mail.delivery_method.settings[:user_name]
     assert_equal "Dummy password", @mail.delivery_method.settings[:password]
   end
@@ -198,6 +199,7 @@ end
 class PostsControllerTestBadRequestData < ActionController::TestCase
   tests PostsController
   setup do
+    @email_notifier = ExceptionNotifier.registered_exception_notifier(:email)
     begin
       # This might seem synthetic, but the point is that the data used by
       # ExceptionNotification could be rendered "invalid" by e.g. a badly
@@ -213,7 +215,7 @@ class PostsControllerTestBadRequestData < ActionController::TestCase
       post :create, :post => @post.attributes
     rescue => e
       @exception = e
-      @mail = ExceptionNotifier::Notifier.exception_notification(request.env, @exception)
+      @mail = @email_notifier.create_email(@exception, {:env => request.env})
     end
   end
 
@@ -225,11 +227,12 @@ end
 class PostsControllerTestBackgroundNotification < ActionController::TestCase
   tests PostsController
   setup do
+    @email_notifier = ExceptionNotifier.registered_exception_notifier(:email)
     begin
       @post = posts(:one)
       post :create, :post => @post.attributes
     rescue => exception
-      @mail = ExceptionNotifier::Notifier.background_exception_notification(exception)
+      @mail = @email_notifier.create_email(exception)
     end
   end
 

@@ -1,15 +1,65 @@
 require 'test_helper'
 
-class BackgroundExceptionNotificationTest < ActiveSupport::TestCase
+class EmailNotifierTest < ActiveSupport::TestCase
   setup do
+    @email_notifier = ExceptionNotifier.registered_exception_notifier(:email)
     begin
       1/0
     rescue => e
       @exception = e
       @time = Time.current
-      @mail = ExceptionNotifier::Notifier.background_exception_notification(@exception,
+      @mail = @email_notifier.create_email(@exception,
         :data => {:job => 'DivideWorkerJob', :payload => '1/0', :message => 'My Custom Message'})
     end
+  end
+
+  test "should have default sender address overridden" do
+    assert @email_notifier.sender_address == %("Dummy Notifier" <dummynotifier@example.com>)
+  end
+
+  test "should have default exception recipients overridden" do
+    assert @email_notifier.exception_recipients == %w(dummyexceptions@example.com)
+  end
+
+  test "should have default email prefix overridden" do
+    assert @email_notifier.email_prefix == "[Dummy ERROR] "
+  end
+
+  test "should have default email headers overridden" do
+    assert @email_notifier.email_headers == { "X-Custom-Header" => "foobar"}
+  end
+
+  test "should have default sections overridden" do
+    for section in %w(new_section request session environment backtrace)
+      assert @email_notifier.sections.include? section
+    end
+  end
+
+  test "should have default background sections" do
+    for section in %w(new_bkg_section backtrace data)
+      assert @email_notifier.background_sections.include? section
+    end
+  end
+
+  test "should have email format by default" do
+    assert @email_notifier.email_format == :text
+  end
+
+  test "should have verbose subject by default" do
+    assert @email_notifier.verbose_subject == true
+  end
+
+  test "should have normalize_subject false by default" do
+    assert @email_notifier.normalize_subject == false
+  end
+
+  test "should have smtp_settings nil by default" do
+    assert @email_notifier.smtp_settings == nil
+  end
+
+  test "should normalize multiple digits into one N" do
+    assert_equal 'N foo N bar N baz N',
+      ExceptionNotifier::EmailNotifier.normalize_digits('1 foo 12 bar 123 baz 1234')
   end
 
   test "mail should be plain text and UTF-8 enconded by default" do
@@ -33,8 +83,7 @@ class BackgroundExceptionNotificationTest < ActiveSupport::TestCase
   end
 
   test "mail should have a descriptive subject" do
-    # subject reads "divided by N" and not "divided by 0" becuase the normalize_subject setting is set
-    assert @mail.subject == "[Dummy ERROR]  (ZeroDivisionError) \"divided by N\""
+    assert @mail.subject == "[Dummy ERROR]  (ZeroDivisionError) \"divided by 0\""
   end
 
   test "mail should say exception was raised in background at show timestamp" do
@@ -46,14 +95,14 @@ class BackgroundExceptionNotificationTest < ActiveSupport::TestCase
       raise ActiveRecord::RecordNotFound
     rescue => e
       @vowel_exception = e
-      @vowel_mail = ExceptionNotifier::Notifier.background_exception_notification(@vowel_exception)
+      @vowel_mail = @email_notifier.create_email(@vowel_exception)
     end
 
     assert @vowel_mail.encoded.include? "An ActiveRecord::RecordNotFound occurred in background at #{@time}"
   end
 
   test "mail should contain backtrace in body" do
-    assert @mail.encoded.include?("test/background_exception_notification_test.rb:6"), "\n#{@mail.inspect}"
+    assert @mail.encoded.include?("test/email_notifier_test.rb:7"), "\n#{@mail.inspect}"
   end
 
   test "mail should contain data in body" do
@@ -73,7 +122,7 @@ class BackgroundExceptionNotificationTest < ActiveSupport::TestCase
     rescue => e
       @ignored_exception = e
       unless ExceptionNotifier.default_ignore_exceptions.include?(@ignored_exception.class.name)
-        @ignored_mail = ExceptionNotifier::Notifier.background_exception_notification(@ignored_exception)
+        @ignored_mail = @email_notifier.create_email(@ignored_exception)
       end
     end
 

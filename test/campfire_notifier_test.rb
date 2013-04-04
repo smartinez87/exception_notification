@@ -6,8 +6,8 @@ class CampfireNotifierTest < ActiveSupport::TestCase
   test "should send campfire notification if properly configured" do
     ExceptionNotifier::CampfireNotifier.stubs(:new).returns(Object.new)
     campfire = ExceptionNotifier::CampfireNotifier.new({:subdomain => 'test', :token => 'test_token', :room_name => 'test_room'})
-    campfire.stubs(:exception_notification).returns(fake_notification)
-    notif = campfire.exception_notification(fake_exception)
+    campfire.stubs(:call).returns(fake_notification)
+    notif = campfire.call(fake_exception)
 
     assert !notif[:message].empty?
     assert_equal notif[:message][:type], 'PasteMessage'
@@ -22,7 +22,7 @@ class CampfireNotifierTest < ActiveSupport::TestCase
     campfire = ExceptionNotifier::CampfireNotifier.new(wrong_params)
 
     assert_nil campfire.room
-    assert_nil campfire.exception_notification(fake_exception)
+    assert_nil campfire.call(fake_exception)
   end
 
   test "should not send campfire notification if config attr missing" do
@@ -31,7 +31,7 @@ class CampfireNotifierTest < ActiveSupport::TestCase
     campfire = ExceptionNotifier::CampfireNotifier.new(wrong_params)
 
     assert_nil campfire.room
-    assert_nil campfire.exception_notification(fake_exception)
+    assert_nil campfire.call(fake_exception)
   end
 
   private

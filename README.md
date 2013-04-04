@@ -30,16 +30,18 @@ run on production. You can make it work by
 
 ```ruby
 Whatever::Application.config.middleware.use ExceptionNotifier,
-  :email_prefix => "[Whatever] ",
-  :sender_address => %{"notifier" <notifier@example.com>},
-  :exception_recipients => %w{exceptions@example.com}
+  :email => {
+    :email_prefix => "[Whatever] ",
+    :sender_address => %{"notifier" <notifier@example.com>},
+    :exception_recipients => %w{exceptions@example.com}
+  }
 ```
 
 ActionMailer Configuration
 ---
 
-For the email to be sent, there must be a default ActionMailer delivery_method setting configured. 
-If you do not have one, you can use the following code (assuming your app server machine has sendmail). 
+For the email to be sent, there must be a default ActionMailer delivery_method setting configured.
+If you do not have one, you can use the following code (assuming your app server machine has sendmail).
 Depending on the environment you want ExceptionNotification to run in, put the following code in your
 config/production.rb and/or config/development.rb:
 
@@ -52,10 +54,10 @@ config.action_mailer.delivery_method = :sendmail
 # }
 config.action_mailer.perform_deliveries = true
 config.action_mailer.raise_delivery_errors = true
-```
+```````
 
 
-Campfire Integration
+Campfire Notifier
 ---
 
 Additionally, ExceptionNotification supports sending notifications to
@@ -66,21 +68,92 @@ to your `Gemfile`:
 
 ```ruby
 gem 'tinder'
-```
+```````
 
 To configure it, you need to set the subdomain, token and room name,
 like this:
 
 ```ruby
 Whatever::Application.config.middleware.use ExceptionNotifier,
-  :email_prefix => "[Whatever] ",
-  :sender_address => %{"notifier" <notifier@example.com>},
-  :exception_recipients => %w{exceptions@example.com},
-  :campfire => {:subdomain => 'my_subdomain', :token => 'my_token', :room_name => 'my_room'}
-```
+  :email => {
+    :email_prefix => "[Whatever] ",
+    :sender_address => %{"notifier" <notifier@example.com>},
+    :exception_recipients => %w{exceptions@example.com}
+  },
+  :campfire => {
+    :subdomain => 'my_subdomain',
+    :token => 'my_token',
+    :room_name => 'my_room'
+  }
+```````
 
 For more options to set Campfire, like _ssl_, check
 [here](https://github.com/collectiveidea/tinder/blob/master/lib/tinder/campfire.rb#L17).
+
+
+Webhook Notifier
+---
+
+ExceptionNotifier also can ship notifications over HTTP protocol.
+
+For this, you'll need to add [HTTParty](https://github.com/jnunemaker/httparty)
+to your `Gemfile`:
+
+```ruby
+gem 'httparty'
+```````
+
+To configure it, you need to set the url like this:
+
+```ruby
+Whatever::Application.config.middleware.use ExceptionNotifier,
+  :email => {
+    :email_prefix => "[Whatever] ",
+    :sender_address => %{"notifier" <notifier@example.com>},
+    :exception_recipients => %w{exceptions@example.com}
+  },
+  :webhook => {
+    :url => 'http://domain.com:5555/hubot/path'
+  }
+```````
+
+By default, the WebhookNotifier will call the URLs using the POST method.
+But, you can change this using the `http_method` option.
+
+```ruby
+Whatever::Application.config.middleware.use ExceptionNotifier,
+  :email => {
+    :email_prefix => "[Whatever] ",
+    :sender_address => %{"notifier" <notifier@example.com>},
+    :exception_recipients => %w{exceptions@example.com}
+  },
+  :webhook => {
+    :url => 'http://domain.com:5555/hubot/path',
+    :http_method => :get
+  }
+```````
+
+Besides the `url` and `http_method` options, all the other options are passed directly to HTTParty.
+Thus, if the HTTP server requires authentication, you can include the following options:
+
+```ruby
+Whatever::Application.config.middleware.use ExceptionNotifier,
+  :email => {
+    :email_prefix => "[Whatever] ",
+    :sender_address => %{"notifier" <notifier@example.com>},
+    :exception_recipients => %w{exceptions@example.com}
+  },
+  :webhook => {
+    :url => 'http://domain.com:5555/hubot/path',
+    :basic_auth => {
+      :username => 'alice',
+      :password => 'password'
+    }
+  }
+```````
+
+For more HTTParty options, check out the [documentation](https://github.com/jnunemaker/httparty).
+
 
 Customization
 ---
@@ -112,10 +185,12 @@ describe application-specific data--just add the section's name to the list
 ```ruby
 #Example with two new added sections
 Whatever::Application.config.middleware.use ExceptionNotifier,
- :email_prefix => "[Whatever] ",
- :sender_address => %{"notifier" <notifier@example.com>},
- :exception_recipients => %w{exceptions@example.com},
- :sections => %w{my_section1 my_section2} + ExceptionNotifier::Notifier.default_sections
+  :email => {
+    :email_prefix => "[Whatever] ",
+    :sender_address => %{"notifier" <notifier@example.com>},
+    :exception_recipients => %w{exceptions@example.com},
+    :sections => %w{my_section1 my_section2} + ExceptionNotifier::Notifier.default_sections
+  }
 ```
 
 Place your custom sections under `./app/views/exception_notifier/` with the suffix `.text.erb`, e.g.
@@ -148,10 +223,12 @@ You may want to include different sections for background notifications:
 ```ruby
 #Example with two new added sections
 Whatever::Application.config.middleware.use ExceptionNotifier,
- :email_prefix => "[Whatever] ",
- :sender_address => %{"notifier" <notifier@example.com>},
- :exception_recipients => %w{exceptions@example.com},
- :background_sections => %w{my_section1 my_section2} + ExceptionNotifier::Notifier.default_background_sections
+  :email => {
+    :email_prefix => "[Whatever] ",
+    :sender_address => %{"notifier" <notifier@example.com>},
+    :exception_recipients => %w{exceptions@example.com},
+    :background_sections => %w{my_section1 my_section2} + ExceptionNotifier::Notifier.default_background_sections
+  }
 ```
 
 By default, the backtrace and data sections are included in background
@@ -178,10 +255,12 @@ To achieve that, you should use the _:ignore_exceptions_ option, like this:
 
 ```ruby
 Whatever::Application.config.middleware.use ExceptionNotifier,
-  :email_prefix         => "[Whatever] ",
-  :sender_address       => %{"notifier" <notifier@example.com>},
-  :exception_recipients => %w{exceptions@example.com},
-  :ignore_exceptions    => ['ActionView::TemplateError'] + ExceptionNotifier.default_ignore_exceptions
+  :ignore_exceptions => ['ActionView::TemplateError'] + ExceptionNotifier.default_ignore_exceptions,
+  :email => {
+    :email_prefix         => "[Whatever] ",
+    :sender_address       => %{"notifier" <notifier@example.com>},
+    :exception_recipients => %w{exceptions@example.com}
+  }
 ```
 
 The above will make ExceptionNotifier ignore a *TemplateError*
@@ -197,10 +276,12 @@ made by crawlers. Using _:ignore_crawlers_ option like this,
 
 ```ruby
 Whatever::Application.config.middleware.use ExceptionNotifier,
-  :email_prefix         => "[Whatever] ",
-  :sender_address       => %{"notifier" <notifier@example.com>},
-  :exception_recipients => %w{exceptions@example.com},
-  :ignore_crawlers      => %w{Googlebot bingbot}
+  :ignore_crawlers => %w{Googlebot bingbot},
+  :email => {
+    :email_prefix         => "[Whatever] ",
+    :sender_address       => %{"notifier" <notifier@example.com>},
+    :exception_recipients => %w{exceptions@example.com}
+  }
 ```
 
 will prevent sending those unwanted notifications.
@@ -211,10 +292,12 @@ Last but not least, you can ignore exceptions based on a condition, by
 
 ```ruby
 Whatever::Application.config.middleware.use ExceptionNotifier,
-  :email_prefix         => "[Whatever] ",
-  :sender_address       => %{"notifier" <notifier@example.com>},
-  :exception_recipients => %w{exceptions@example.com},
-  :ignore_if            => lambda { |env, e| e.message =~ /^Couldn't find Page with ID=/ }
+  :ignore_if => lambda { |env, e| e.message =~ /^Couldn't find Page with ID=/ },
+  :email => {
+    :email_prefix         => "[Whatever] ",
+    :sender_address       => %{"notifier" <notifier@example.com>},
+    :exception_recipients => %w{exceptions@example.com},
+  }
 ```
 
 You can make use of both the environment and the exception inside the lambda to decide wether to
@@ -227,11 +310,13 @@ emails. To do so, simply use the _:email_headers_ option:
 
 ```ruby
 Whatever::Application.config.middleware.use ExceptionNotifier,
-  :email_prefix         => "[Whatever] ",
-  :sender_address       => %{"notifier" <notifier@example.com>},
-  :exception_recipients => %w{exceptions@example.com},
-  :ignore_if            => lambda { |env, e| e.message =~ /^Couldn't find Page with ID=/ },
-  :email_headers        => { "X-Custom-Header" => "foobar" }
+  :ignore_if => lambda { |env, e| e.message =~ /^Couldn't find Page with ID=/ },
+  :email => {
+    :email_prefix         => "[Whatever] ",
+    :sender_address       => %{"notifier" <notifier@example.com>},
+    :exception_recipients => %w{exceptions@example.com},
+    :email_headers        => { "X-Custom-Header" => "foobar" }
+  }
 ```
 
 ### Verbose
@@ -255,14 +340,13 @@ Background Notifications
 ---
 
 If you want to send notifications from a background process like
-DelayedJob, you should use the background_exception_notification method
-like this:
+DelayedJob, you should use the `notify_exception` method like this:
 
 ```ruby
 begin
   some code...
 rescue => e
-  ExceptionNotifier::Notifier.background_exception_notification(e).deliver
+  ExceptionNotifier.notify_exception(e)
 end
 ```
 
@@ -273,8 +357,8 @@ the error by including a data parameter:
 begin
   some code...
 rescue => exception
-  ExceptionNotifier::Notifier.background_exception_notification(exception,
-    :data => {:worker => worker.to_s, :queue => queue, :payload => payload}).deliver
+  ExceptionNotifier.notify_exception(exception,
+    :data => {:worker => worker.to_s, :queue => queue, :payload => payload})
 end
 ```
 
@@ -291,8 +375,8 @@ rescue_from Exception, :with => :server_error
 def server_error(exception)
   # Whatever code that handles the exception
 
-  ExceptionNotifier::Notifier.exception_notification(request.env, exception,
-    :data => {:message => "was doing something wrong"}).deliver
+  ExceptionNotifier.notify_exception(exception,
+    :env => request.env, :data => {:message => "was doing something wrong"})
 end
 ```
 
@@ -310,12 +394,14 @@ You can use specific SMTP settings for notifications:
 
 ```ruby
 Whatever::Application.config.middleware.use ExceptionNotifier,
-  :email_prefix         => "[Whatever] ",
-  :sender_address       => %{"notifier" <notifier@example.com>},
-  :exception_recipients => %w{exceptions@example.com},
-  :smtp_settings => {
-    :user_name => "bob",
-    :password => "password",
+  :email => {
+    :email_prefix         => "[Whatever] ",
+    :sender_address       => %{"notifier" <notifier@example.com>},
+    :exception_recipients => %w{exceptions@example.com},
+    :smtp_settings => {
+      :user_name => "bob",
+      :password => "password",
+    }
   }
 ```
 
