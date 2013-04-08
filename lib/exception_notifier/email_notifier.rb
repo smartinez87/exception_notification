@@ -78,7 +78,7 @@ class ExceptionNotifier
       end
     end
 
-    class Mailer < ActionMailer::Base
+    class Mailer < ExceptionNotifier.parent_mailer.constantize
       self.mailer_name = 'exception_notifier'
 
       # Append application view path to the ExceptionNotifier lookup context.

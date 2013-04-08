@@ -11,6 +11,12 @@ class ExceptionNotifier
 
   class UndefinedNotifierError < StandardError; end
 
+  # The parent mailer EmailNotifier inherit from.
+  # Defaults to ActionMailer::Base. This should be set early
+  # in the initialization process and should be set to a string.
+  cattr_accessor :parent_mailer
+  @@parent_mailer = "ActionMailer::Base"
+
   class << self
     @@notifiers = {}
     @@ignored_exceptions = []
