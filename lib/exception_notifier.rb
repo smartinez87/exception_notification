@@ -11,12 +11,6 @@ class ExceptionNotifier
 
   class UndefinedNotifierError < StandardError; end
 
-  # The parent mailer EmailNotifier inherit from.
-  # Defaults to ActionMailer::Base. This should be set early
-  # in the initialization process and should be set to a string.
-  cattr_accessor :parent_mailer
-  @@parent_mailer = "ActionMailer::Base"
-
   class << self
     @@notifiers = {}
     @@ignored_exceptions = []
@@ -129,7 +123,7 @@ class ExceptionNotifier
   def make_options_backward_compatible(options)
     email_options_names = [:sender_address, :exception_recipients,
         :email_prefix, :email_format, :sections, :background_sections,
-        :verbose_subject, :normalize_subject, :smtp_settings, :email_headers]
+        :verbose_subject, :normalize_subject, :smtp_settings, :email_headers, :mailer_parent]
 
     if email_options_names.any?{|eo| options.has_key?(eo) }
       ActiveSupport::Deprecation.warn "You are using an old configuration style for ExceptionNotifier middleware. Please, revise your configuration options later."
