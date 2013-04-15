@@ -2,3 +2,6 @@ language: ruby
 rvm:
   - 1.9.3
   - 2.0.0
+gemfile:
+ - gemfiles/rails3_2/Gemfile
+ - gemfiles/rails4_0/Gemfile
