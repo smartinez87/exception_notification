@@ -123,7 +123,7 @@ class ExceptionNotifier
   def make_options_backward_compatible(options)
     email_options_names = [:sender_address, :exception_recipients,
         :email_prefix, :email_format, :sections, :background_sections,
-        :verbose_subject, :normalize_subject, :smtp_settings, :email_headers]
+        :verbose_subject, :normalize_subject, :smtp_settings, :email_headers, :mailer_parent]
 
     if email_options_names.any?{|eo| options.has_key?(eo) }
       ActiveSupport::Deprecation.warn "You are using an old configuration style for ExceptionNotifier middleware. Please, revise your configuration options later."
