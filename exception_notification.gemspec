@@ -18,7 +18,6 @@ Gem::Specification.new do |s|
   s.add_development_dependency "tinder", "~> 1.8"
   s.add_development_dependency "httparty", "~> 0.10.2"
   s.add_development_dependency "mocha", ">= 0.13.0"
-  s.add_development_dependency "sqlite3", ">= 1.3.4"
   s.add_development_dependency "coveralls", "~> 0.6.5"
   s.add_development_dependency "appraisal", ">= 0"
 end
