@@ -5,7 +5,10 @@ gem 'rails', '3.2.8'
 # Bundle edge Rails instead:
 # gem 'rails', :git => 'git://github.com/rails/rails.git'
 
-gem 'sqlite3'
+
+gem "sqlite3", ">= 1.3.4", platform: :ruby
+gem "jdbc-sqlite3", ">= 3.7.2",  platform: :jruby
+gem "activerecord-jdbc-adapter", ">= 1.2.8",  platform: :jruby
 
 gem 'tinder'
 gem 'httparty'
