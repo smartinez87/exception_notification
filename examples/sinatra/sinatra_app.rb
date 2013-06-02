@@ -4,7 +4,7 @@ require 'sinatra/base'
 require 'exception_notification'
 
 class SinatraApp < Sinatra::Base
-  use ExceptionNotifier,
+  use ExceptionNotification::Rack,
     :email => {
       :email_prefix => "[Example] ",
       :sender_address => %{"notifier" <notifier@example.com>},

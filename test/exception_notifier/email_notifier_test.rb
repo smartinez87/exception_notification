@@ -53,8 +53,16 @@ class EmailNotifierTest < ActiveSupport::TestCase
     assert @email_notifier.normalize_subject == false
   end
 
-  test "should have smtp_settings nil by default" do
-    assert @email_notifier.smtp_settings == nil
+  test "should have delivery_method nil by default" do
+    assert @email_notifier.delivery_method == nil
+  end
+
+  test "should have mailer_settings nil by default" do
+    assert @email_notifier.mailer_settings == nil
+  end
+
+  test "should have mailer_parent by default" do
+    assert @email_notifier.mailer_parent == 'ActionMailer::Base'
   end
 
   test "should have template_path by default" do
@@ -106,7 +114,7 @@ class EmailNotifierTest < ActiveSupport::TestCase
   end
 
   test "mail should contain backtrace in body" do
-    assert @mail.encoded.include?("test/email_notifier_test.rb:8"), "\n#{@mail.inspect}"
+    assert @mail.encoded.include?("test/exception_notifier/email_notifier_test.rb:8"), "\n#{@mail.inspect}"
   end
 
   test "mail should contain data in body" do
@@ -125,7 +133,7 @@ class EmailNotifierTest < ActiveSupport::TestCase
       raise ActiveRecord::RecordNotFound
     rescue => e
       @ignored_exception = e
-      unless ExceptionNotifier.default_ignore_exceptions.include?(@ignored_exception.class.name)
+      unless ExceptionNotifier.ignored_exceptions.include?(@ignored_exception.class.name)
         @ignored_mail = @email_notifier.create_email(@ignored_exception)
       end
     end

@@ -2,95 +2,11 @@ require 'action_mailer'
 require 'action_dispatch'
 require 'pp'
 
-class ExceptionNotifier
+module ExceptionNotifier
   class EmailNotifier < Struct.new(:sender_address, :exception_recipients,
     :email_prefix, :email_format, :sections, :background_sections,
-    :verbose_subject, :normalize_subject, :smtp_settings, :email_headers,
-    :mailer_parent, :template_path)
-
-    class << self
-      attr_writer :default_sender_address
-      attr_writer :default_exception_recipients
-      attr_writer :default_email_prefix
-      attr_writer :default_email_format
-      attr_writer :default_sections
-      attr_writer :default_background_sections
-      attr_writer :default_verbose_subject
-      attr_writer :default_normalize_subject
-      attr_writer :default_smtp_settings
-      attr_writer :default_email_headers
-      attr_writer :default_mailer_parent
-      attr_writer :default_template_path
-
-      def default_sender_address
-        @default_sender_address || %("Exception Notifier" <exception.notifier@example.com>)
-      end
-
-      def default_exception_recipients
-        @default_exception_recipients || []
-      end
-
-      def default_email_prefix
-        @default_email_prefix || "[ERROR] "
-      end
-
-      def default_email_format
-        @default_email_format || :text
-      end
-
-      def default_sections
-        @default_sections || %w(request session environment backtrace)
-      end
-
-      def default_background_sections
-        @default_background_sections || %w(backtrace data)
-      end
-
-      def default_verbose_subject
-        @default_verbose_subject.nil? || @default_verbose_subject
-      end
-
-      def default_normalize_subject
-        @default_normalize_prefix || false
-      end
-
-      def default_smtp_settings
-        @default_smtp_settings || nil
-      end
-
-      def default_email_headers
-        @default_email_headers || {}
-      end
-
-      def default_mailer_parent
-        @default_mailer_parent || 'ActionMailer::Base'
-      end
-
-      def default_template_path
-        @default_template_path || 'exception_notifier'
-      end
-
-      def default_options
-        {
-          :sender_address => default_sender_address,
-          :exception_recipients => default_exception_recipients,
-          :email_prefix => default_email_prefix,
-          :email_format => default_email_format,
-          :sections => default_sections,
-          :background_sections => default_background_sections,
-          :verbose_subject => default_verbose_subject,
-          :normalize_subject => default_normalize_subject,
-          :smtp_settings => default_smtp_settings,
-          :email_headers => default_email_headers,
-          :mailer_parent => default_mailer_parent,
-          :template_path => default_template_path
-        }
-      end
-
-      def normalize_digits(string)
-        string.gsub(/[0-9]+/, 'N')
-      end
-    end
+    :verbose_subject, :normalize_subject, :delivery_method, :mailer_settings,
+    :email_headers, :mailer_parent, :template_path)
 
     module Mailer
       class MissingController
@@ -177,6 +93,7 @@ class ExceptionNotifier
             name = @env.nil? ? 'background_exception_notification' : 'exception_notification'
 
             headers = {
+                :delivery_method => @options[:delivery_method],
                 :to => @options[:exception_recipients],
                 :from => @options[:sender_address],
                 :subject => subject,
@@ -188,7 +105,7 @@ class ExceptionNotifier
               format.html if html_mail?
             end
 
-            mail.delivery_method.settings.merge!(@options[:smtp_settings]) if @options[:smtp_settings]
+            mail.delivery_method.settings.merge!(@options[:mailer_settings]) if @options[:mailer_settings]
 
             mail
           end
@@ -201,25 +118,15 @@ class ExceptionNotifier
     end
 
     def initialize(options)
-      # here be dragons! grants backwards compatibility.
-      EmailNotifier.default_sender_address       = options[:sender_address]
-      EmailNotifier.default_exception_recipients = options[:exception_recipients]
-      EmailNotifier.default_email_prefix         = options[:email_prefix]
-      EmailNotifier.default_email_format         = options[:email_format]
-      EmailNotifier.default_sections             = options[:sections]
-      EmailNotifier.default_background_sections  = options[:background_sections]
-      EmailNotifier.default_verbose_subject      = options[:verbose_subject]
-      EmailNotifier.default_normalize_subject    = options[:normalize_subject]
-      EmailNotifier.default_smtp_settings        = options[:smtp_settings]
-      EmailNotifier.default_email_headers        = options[:email_headers]
-      EmailNotifier.default_mailer_parent        = options[:mailer_parent]
-      EmailNotifier.default_template_path        = options[:template_path]
+      delivery_method = (options[:delivery_method] || :smtp)
+      mailer_settings_key = "#{delivery_method}_settings".to_sym
+      options[:mailer_settings] = options.delete(mailer_settings_key)
 
       super(*options.reverse_merge(EmailNotifier.default_options).values_at(
         :sender_address, :exception_recipients,
         :email_prefix, :email_format, :sections, :background_sections,
-        :verbose_subject, :normalize_subject, :smtp_settings, :email_headers,
-        :mailer_parent, :template_path))
+        :verbose_subject, :normalize_subject, :delivery_method, :mailer_settings,
+        :email_headers, :mailer_parent, :template_path))
     end
 
     def options
@@ -247,6 +154,28 @@ class ExceptionNotifier
       else
         mailer.exception_notification(env, exception, options, default_options)
       end
+    end
+
+    def self.default_options
+      {
+        :sender_address => %("Exception Notifier" <exception.notifier@example.com>),
+        :exception_recipients => [],
+        :email_prefix => "[ERROR] ",
+        :email_format => :text,
+        :sections => %w(request session environment backtrace),
+        :background_sections => %w(backtrace data),
+        :verbose_subject => true,
+        :normalize_subject => false,
+        :delivery_method => nil,
+        :mailer_settings => nil,
+        :email_headers => {},
+        :mailer_parent => 'ActionMailer::Base',
+        :template_path => 'exception_notifier'
+      }
+    end
+
+    def self.normalize_digits(string)
+      string.gsub(/[0-9]+/, 'N')
     end
   end
 end

@@ -1,4 +1,4 @@
-class ExceptionNotifier
+module ExceptionNotifier
   class WebhookNotifier
 
     def initialize(options)

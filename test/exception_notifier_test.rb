@@ -2,11 +2,7 @@ require 'test_helper'
 
 class ExceptionNotifierTest < ActiveSupport::TestCase
   test "should have default ignored exceptions" do
-    assert ExceptionNotifier.default_ignore_exceptions == ['ActiveRecord::RecordNotFound', 'AbstractController::ActionNotFound', 'ActionController::RoutingError']
-  end
-
-  test "should have ignored crawler by default" do
-    assert ExceptionNotifier.default_ignore_crawlers == []
+    assert ExceptionNotifier.ignored_exceptions == ['ActiveRecord::RecordNotFound', 'AbstractController::ActionNotFound', 'ActionController::RoutingError']
   end
 
   test "should have email notifier registered" do
@@ -62,6 +58,29 @@ class ExceptionNotifierTest < ActiveSupport::TestCase
     ExceptionNotifier.unregister_exception_notifier(:notifier1)
     ExceptionNotifier.unregister_exception_notifier(:notifier2)
     assert ExceptionNotifier.notifiers == [:email]
+  end
+
+  test "should ignore exception if satisfies conditional ignore" do
+    env = "production"
+    ExceptionNotifier.ignore_if do |exception, options|
+      env != "production"
+    end
+
+    notifier_calls = 0
+    test_notifier = lambda { |exception, options| notifier_calls += 1 }
+    ExceptionNotifier.register_exception_notifier(:test, test_notifier)
+
+    exception = StandardError.new
+
+    ExceptionNotifier.notify_exception(exception, {:notifiers => :test})
+    assert notifier_calls == 1
+
+    env = "development"
+    ExceptionNotifier.notify_exception(exception, {:notifiers => :test})
+    assert notifier_calls == 1
+
+    ExceptionNotifier.clear_ignore_conditions!
+    ExceptionNotifier.unregister_exception_notifier(:test)
   end
 
   test "should not send notification if one of ignored exceptions" do

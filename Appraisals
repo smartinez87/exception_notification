@@ -7,5 +7,5 @@ appraise "rails3_2" do
 end
 
 appraise "rails4_0" do
-  gem 'rails', :git => 'git://github.com/rails/rails.git'
+  gem 'rails', '4.0.0.rc1'
 end

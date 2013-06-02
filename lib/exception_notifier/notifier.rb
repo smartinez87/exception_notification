@@ -1,6 +1,6 @@
 require 'active_support/deprecation'
 
-class ExceptionNotifier
+module ExceptionNotifier
   class Notifier
 
     def self.exception_notification(env, exception, options={})

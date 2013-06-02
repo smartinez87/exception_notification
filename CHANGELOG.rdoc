@@ -1,6 +1,12 @@
 == 4.0.0
 
 * enhancements
+  * Be able to override delivery_method (by @jweslley)
+  * Add logger to log when notifications cannot be shiped (by @jweslley)
+  * Add Rails generator to create an initializer file (by @jweslley)
+  * Add rails engine (by @jweslley)
+  * Add sidekiq support (by @jweslley)
+  * Add resque support (by @jweslley)
   * Better style for html views (by @jweslley)
   * Support customizable Mailer class (by @Bishop)
   * Turn ExceptionNotification Rails agnostic (by @jweslley)

@@ -15,6 +15,8 @@ Gem::Specification.new do |s|
   s.add_dependency("activesupport", ">= 3.0.4")
 
   s.add_development_dependency "rails", ">= 3.0.4"
+  s.add_development_dependency "resque", "~> 1.2.0"
+  s.add_development_dependency "sidekiq", "~> 2.0"
   s.add_development_dependency "tinder", "~> 1.8"
   s.add_development_dependency "httparty", "~> 0.10.2"
   s.add_development_dependency "mocha", ">= 0.13.0"

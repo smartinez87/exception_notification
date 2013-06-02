@@ -1,8 +1,7 @@
-require 'active_support/deprecation'
-require 'active_support/core_ext/array/wrap'
+require 'logger'
 require 'active_support/core_ext/string/inflections'
 
-class ExceptionNotifier
+module ExceptionNotifier
 
   autoload :Notifier, 'exception_notifier/notifier'
   autoload :EmailNotifier, 'exception_notifier/email_notifier'
@@ -11,29 +10,41 @@ class ExceptionNotifier
 
   class UndefinedNotifierError < StandardError; end
 
+  # Define logger
+  mattr_accessor :logger
+  @@logger = Logger.new(STDOUT)
+
+  # Define a set of exceptions to be ignored, ie, dont send notifications when any of them are raised.
+  mattr_accessor :ignored_exceptions
+  @@ignored_exceptions = %w{ActiveRecord::RecordNotFound AbstractController::ActionNotFound ActionController::RoutingError}
+
   class << self
+    # Store conditions that decide when exceptions must be ignored or not.
+    @@ignores = []
+
+    # Store notifiers that send notifications when exceptions are raised.
     @@notifiers = {}
-    @@ignored_exceptions = []
-
-    def default_ignore_exceptions
-      ['ActiveRecord::RecordNotFound', 'AbstractController::ActionNotFound', 'ActionController::RoutingError']
-    end
-
-    def default_ignore_crawlers
-      []
-    end
 
     def notify_exception(exception, options={})
-      return if ignored_exception?(options[:ignore_exceptions], exception)
+      return false if ignored_exception?(options[:ignore_exceptions], exception)
+      return false if ignored?(exception, options)
       selected_notifiers = options.delete(:notifiers) || notifiers
       [*selected_notifiers].each do |notifier|
         fire_notification(notifier, exception, options.dup)
       end
+      true
     end
 
-    def register_exception_notifier(name, notifier)
-      @@notifiers[name] = notifier
+    def register_exception_notifier(name, notifier_or_options)
+      if notifier_or_options.respond_to?(:call)
+        @@notifiers[name] = notifier_or_options
+      elsif notifier_or_options.is_a?(Hash)
+        create_and_register_notifier(name, notifier_or_options)
+      else
+        raise ArgumentError, "Invalid notifier '#{name}' defined as #{notifier_or_options.inspect}"
+      end
     end
+    alias add_notifier register_exception_notifier
 
     def unregister_exception_notifier(name)
       @@notifiers.delete(name)
@@ -47,91 +58,46 @@ class ExceptionNotifier
       @@notifiers.keys
     end
 
-    def ignored_exceptions
-      @@ignored_exceptions
+    # Adds a condition to decide when an exception must be ignored or not.
+    #
+    #   ExceptionNotifier.ignore_if do |exception, options|
+    #     not Rails.env.production?
+    #   end
+    def ignore_if(&block)
+      @@ignores << block
     end
 
-    def ignored_exceptions=(ignored_exceptions)
-      @@ignored_exceptions = Array.wrap(ignored_exceptions)
+    def clear_ignore_conditions!
+      @@ignores.clear
     end
 
     private
+    def ignored?(exception, options)
+      @@ignores.any?{ |condition| condition.call(exception, options) }
+    rescue Exception => e
+      logger.warn "An error occurred when evaluating an ignore condition. #{e.class}: #{e.message}"
+      false
+    end
+
     def ignored_exception?(ignore_array, exception)
-      (ignored_exceptions + Array.wrap(ignore_array)).map(&:to_s).include?(exception.class.name)
+      (Array(ignored_exceptions) + Array(ignore_array)).map(&:to_s).include?(exception.class.name)
     end
 
     def fire_notification(notifier_name, exception, options)
       notifier = registered_exception_notifier(notifier_name)
       notifier.call(exception, options)
-    rescue
+    rescue Exception => e
+      logger.warn "An error occurred when sending a notification using '#{notifier_name}' notifier. #{e.class}: #{e.message}"
       false
     end
-  end
 
-  def initialize(app, options = {})
-    @app = app
-
-    @options = {}
-    @options[:ignore_crawlers]    = options.delete(:ignore_crawlers) || self.class.default_ignore_crawlers
-    @options[:ignore_if]          = options.delete(:ignore_if) || lambda { |env, e| false }
-    self.class.ignored_exceptions = options.delete(:ignore_exceptions) || self.class.default_ignore_exceptions
-
-    options = make_options_backward_compatible(options)
-    options.each do |notifier_name, options|
-      create_and_register_notifier(notifier_name, options)
+    def create_and_register_notifier(name, options)
+      notifier_classname = "#{name}_notifier".camelize
+      notifier_class = ExceptionNotifier.const_get(notifier_classname)
+      notifier = notifier_class.new(options)
+      register_exception_notifier(name, notifier)
+    rescue NameError => e
+      raise UndefinedNotifierError, "No notifier named '#{name}' was found. Please, revise your configuration options. Cause: #{e.message}"
     end
-  end
-
-  def call(env)
-    @app.call(env)
-  rescue Exception => exception
-    options = @options.dup
-
-    unless from_crawler(options[:ignore_crawlers], env['HTTP_USER_AGENT']) ||
-           conditionally_ignored(options[:ignore_if], env, exception)
-      ExceptionNotifier.notify_exception(exception, options.reverse_merge(:env => env))
-      env['exception_notifier.delivered'] = true
-    end
-
-    raise exception
-  end
-
-  private
-
-  def from_crawler(ignore_array, agent)
-    ignore_array.each do |crawler|
-      return true if (agent =~ Regexp.new(crawler))
-    end unless ignore_array.blank?
-    false
-  end
-
-  def conditionally_ignored(ignore_proc, env, exception)
-    ignore_proc.call(env, exception)
-  rescue Exception
-    false
-  end
-
-  def create_and_register_notifier(name, options)
-    notifier_classname = "#{name}_notifier".camelize
-    notifier_class = ExceptionNotifier.const_get(notifier_classname)
-    notifier = notifier_class.new(options)
-    ExceptionNotifier.register_exception_notifier(name, notifier)
-  rescue NameError => e
-    raise UndefinedNotifierError, "No notifier named '#{name}' was found. Please, revise your configuration options. Cause: #{e.message}"
-  end
-
-  def make_options_backward_compatible(options)
-    email_options_names = [:sender_address, :exception_recipients,
-        :email_prefix, :email_format, :sections, :background_sections,
-        :verbose_subject, :normalize_subject, :smtp_settings, :email_headers, :mailer_parent]
-
-    if email_options_names.any?{|eo| options.has_key?(eo) }
-      ActiveSupport::Deprecation.warn "You are using an old configuration style for ExceptionNotifier middleware. Please, revise your configuration options later."
-      email_options = options.select{ |k,v| email_options_names.include?(k) }
-      options.reject!{ |k,v| email_options_names.include?(k) }
-      options[:email] = email_options
-    end
-
-    options
   end
 end

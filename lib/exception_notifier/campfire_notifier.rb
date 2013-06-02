@@ -1,4 +1,4 @@
-class ExceptionNotifier
+module ExceptionNotifier
   class CampfireNotifier
 
     attr_accessor :subdomain
