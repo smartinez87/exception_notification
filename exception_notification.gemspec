@@ -6,6 +6,7 @@ Gem::Specification.new do |s|
   s.summary = "Exception notification for Rails apps"
   s.homepage = "http://smartinez87.github.com/exception_notification"
   s.email = "smartinez87@gmail.com"
+  s.license = "MIT"
 
   s.files = `git ls-files`.split("\n")
   s.test_files = `git ls-files -- test`.split("\n")
