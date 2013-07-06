@@ -47,7 +47,7 @@ Whatever::Application.config.middleware.use ExceptionNotification::Rack,
   }
 ```
 
-> **Note**: In order delivery notifications by email make sure you have [ActionMailer configured](#actionmailer-configuration).
+> **Note**: In order to enable delivery notifications by email make sure you have [ActionMailer configured](#actionmailer-configuration).
 
 
 In order to use ExceptionNotification with Sinatra, please take a look in the [example application](https://github.com/smartinez87/exception_notification/tree/master/examples/sinatra).
@@ -75,7 +75,7 @@ Whatever::Application.config.middleware.use ExceptionNotification::Rack,
   }
 ```
 
-Beside that, the rack middlware was renamed to `ExceptionNotification::Rack`.
+Beside that, the rack middleware was renamed to `ExceptionNotification::Rack`.
 
 ## Notifiers
 
@@ -195,7 +195,7 @@ Whatever::Application.config.middleware.use ExceptionNotification::Rack,
 
 ##### email_headers
 
-*Hash os strings, default: {}*
+*Hash of strings, default: {}*
 
 Additionally, you may want to set customized headers on the outcoming emails. To do so, simply use the `:email_headers` option:
 
