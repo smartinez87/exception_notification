@@ -326,6 +326,67 @@ The API token to allow access to your Campfire account.
 For more options to set Campfire, like _ssl_, check [here](https://github.com/collectiveidea/tinder/blob/master/lib/tinder/campfire.rb#L17).
 
 
+### HipChat notifier
+
+This notifier sends notifications to your Hipchat room.
+
+#### Usage
+
+Just add the [hipchat](https://github.com/hipchat/hipchat) gem to your `Gemfile`:
+
+```ruby
+gem 'hipchat'
+```
+
+To configure it, you need to set the `token` and `room_name` options, like this:
+
+```ruby
+Whatever::Application.config.middleware.use ExceptionNotification::Rack,
+  :email => {
+    :email_prefix => "[Whatever] ",
+    :sender_address => %{"notifier" <notifier@example.com>},
+    :exception_recipients => %w{exceptions@example.com}
+  },
+  :hipchat => {
+    :api_token => 'my_token',
+    :room_name => 'my_room'
+  }
+```
+
+#### Options
+
+##### room_name
+
+*String, required*
+
+The HipChat room where the notifications must be published to.
+
+##### api_token
+
+*String, required*
+
+The API token to allow access to your HipChat account.
+
+##### announce
+
+*Boolean, optionnal*
+
+Notify users. Default : false.
+
+##### color
+
+*String, optionnal*
+
+Color of the message. Default : 'red'.
+
+##### from
+
+*String, optionnal*
+
+Message will appear from this nickname. Default : 'Exception'.
+
+For all options & possible values see [Hipchat API][https://www.hipchat.com/docs/api/method/rooms/message].
+
 ### Webhook notifier
 
 This notifier ships notifications over the HTTP protocol.

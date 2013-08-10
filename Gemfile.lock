@@ -58,6 +58,8 @@ GEM
       faraday (>= 0.7.4, < 0.9)
     hashie (1.2.0)
     hike (1.2.1)
+    hipchat (0.11.0)
+      httparty
     http_parser.rb (0.5.3)
     httparty (0.10.2)
       multi_json (~> 1.0)
@@ -155,6 +157,7 @@ DEPENDENCIES
   appraisal
   coveralls (~> 0.6.5)
   exception_notification!
+  hipchat (>= 0.11.0)
   httparty (~> 0.10.2)
   mocha (>= 0.13.0)
   rails (>= 3.0.4)

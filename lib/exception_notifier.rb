@@ -6,6 +6,7 @@ module ExceptionNotifier
   autoload :Notifier, 'exception_notifier/notifier'
   autoload :EmailNotifier, 'exception_notifier/email_notifier'
   autoload :CampfireNotifier, 'exception_notifier/campfire_notifier'
+  autoload :HipchatNotifier, 'exception_notifier/hipchat_notifier'
   autoload :WebhookNotifier, 'exception_notifier/webhook_notifier'
 
   class UndefinedNotifierError < StandardError; end
