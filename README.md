@@ -385,7 +385,7 @@ Color of the message. Default : 'red'.
 
 Message will appear from this nickname. Default : 'Exception'.
 
-For all options & possible values see [Hipchat API][https://www.hipchat.com/docs/api/method/rooms/message].
+For all options & possible values see [Hipchat API](https://www.hipchat.com/docs/api/method/rooms/message).
 
 ### Webhook notifier
 
