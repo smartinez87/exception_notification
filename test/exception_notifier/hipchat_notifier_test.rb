@@ -59,6 +59,19 @@ class HipchatNotifierTest < ActiveSupport::TestCase
     assert_nil hipchat.room
   end
 
+  test "should allow API version to be specified" do
+    options = {
+      :api_token   => 'good_token',
+      :room_name   => 'room_name',
+      :color       => 'yellow',
+      :api_version => 'v1',
+    }
+    HipChat::Room.any_instance.expects(:send).with('Exception', fake_body, { :color => 'yellow' })
+
+    hipchat = ExceptionNotifier::HipchatNotifier.new(options)
+    hipchat.call(fake_exception)
+  end
+
   private
 
   def fake_body

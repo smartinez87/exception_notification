@@ -9,8 +9,9 @@ module ExceptionNotifier
       begin
         api_token				  = options.delete(:api_token)
         room_name 			  = options.delete(:room_name)
+        api_version = options.delete(:api_version) || 'v1'
         @from             = options.delete(:from) || 'Exception'
-        @room     			  = HipChat::Client.new(api_token)[room_name]
+        @room     			  = hipchat_client(api_token, api_version)[room_name]
         @message_options  = options
         @message_options[:color] ||= 'red'
       rescue
@@ -30,5 +31,14 @@ module ExceptionNotifier
     def active?
       !@room.nil?
     end
+
+    def hipchat_client(api_token, api_version)
+      if api_version.eql?('v2')
+        HipChat::Client.new(api_token, :api_version => api_version)
+      else
+        HipChat::Client.new(api_token)
+      end
+    end
+
   end
 end
