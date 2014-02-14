@@ -28,4 +28,5 @@ Gem::Specification.new do |s|
   s.add_development_dependency "coveralls", "~> 0.6.5"
   s.add_development_dependency "appraisal", ">= 0"
   s.add_development_dependency "hipchat", ">= 0.11.0"
+  s.add_development_dependency "carrier-pigeon", ">= 0.7.0"
 end
