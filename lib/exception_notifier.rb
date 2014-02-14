@@ -9,6 +9,7 @@ module ExceptionNotifier
   autoload :CampfireNotifier, 'exception_notifier/campfire_notifier'
   autoload :HipchatNotifier, 'exception_notifier/hipchat_notifier'
   autoload :WebhookNotifier, 'exception_notifier/webhook_notifier'
+  autoload :IrcNotifier, 'exception_notifier/irc_notifier'
 
   class UndefinedNotifierError < StandardError; end
 
