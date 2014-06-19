@@ -10,6 +10,7 @@ module ExceptionNotifier
   autoload :HipchatNotifier, 'exception_notifier/hipchat_notifier'
   autoload :WebhookNotifier, 'exception_notifier/webhook_notifier'
   autoload :IrcNotifier, 'exception_notifier/irc_notifier'
+  autoload :ThrottleNotifier, 'exception_notifier/throttle_notifier'
 
   class UndefinedNotifierError < StandardError; end
 
@@ -74,6 +75,12 @@ module ExceptionNotifier
       @@ignores.clear
     end
 
+    def create_notifier(name, options)
+      notifier_classname = "#{name}_notifier".camelize
+      notifier_class = ExceptionNotifier.const_get(notifier_classname)
+      notifier_class.new(options)
+    end
+
     private
     def ignored?(exception, options)
       @@ignores.any?{ |condition| condition.call(exception, options) }
@@ -95,10 +102,7 @@ module ExceptionNotifier
     end
 
     def create_and_register_notifier(name, options)
-      notifier_classname = "#{name}_notifier".camelize
-      notifier_class = ExceptionNotifier.const_get(notifier_classname)
-      notifier = notifier_class.new(options)
-      register_exception_notifier(name, notifier)
+      register_exception_notifier(name, create_notifier(name, options))
     rescue NameError => e
       raise UndefinedNotifierError, "No notifier named '#{name}' was found. Please, revise your configuration options. Cause: #{e.message}"
     end
