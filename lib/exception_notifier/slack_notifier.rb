@@ -21,7 +21,7 @@ module ExceptionNotifier
     end
 
     def call(exception, options={})
-      message = "An exception occurred: '#{exception.message}' on '#{exception.backtrace.first}'"
+      message = "An exception occurred on *#{Rails.application.class.parent_name} (#{Rails.env})*: ```#{exception.message}```"
       @notifier.ping message if valid?
     end
 
