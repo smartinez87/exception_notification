@@ -93,6 +93,6 @@ class SlackNotifierTest < ActiveSupport::TestCase
   end
 
   def fake_notification
-    "An exception occurred: '#{fake_exception.message}' on '#{fake_exception.backtrace.first}'"
+    "An exception occurred on *#{Rails.application.class.parent_name} (#{Rails.env})*: ```#{fake_exception.message}```"
   end
 end
