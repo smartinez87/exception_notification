@@ -8,7 +8,7 @@ module ExceptionNotifier
         team = options.fetch(:team)
         token = options.fetch(:token)
         custom_hook = options.fetch(:custom_hook, nil)
-        options[:username] ||= 'ExceptionNotifierBot'
+        options[:username] ||= "#{Rails.application.class.parent_name} (#{Rails.env})"
 
         if custom_hook.nil?
           @notifier = Slack::Notifier.new team, token, options
@@ -21,7 +21,7 @@ module ExceptionNotifier
     end
 
     def call(exception, options={})
-      message = "An exception occurred on *#{Rails.application.class.parent_name} (#{Rails.env})*: ```#{exception.message}```"
+      message = "```#{exception.message}```"
       @notifier.ping message if valid?
     end
 
