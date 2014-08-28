@@ -1,3 +1,4 @@
+require 'exception_notification'
 require 'exception_notification/rails'
 <% if options.sidekiq? %>
 require 'exception_notification/sidekiq'
