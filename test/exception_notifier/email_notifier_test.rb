@@ -2,15 +2,26 @@ require 'test_helper'
 
 class EmailNotifierTest < ActiveSupport::TestCase
   setup do
+    @clean_backtrace = ExceptionNotifier.clean_backtrace
+    ExceptionNotifier.clean_backtrace = true
+
     Time.stubs(:current).returns('Sat, 20 Apr 2013 20:58:55 UTC +00:00')
     @email_notifier = ExceptionNotifier.registered_exception_notifier(:email)
+
     begin
       1/0
     rescue => e
       @exception = e
+
+      Rails.backtrace_cleaner.stubs(:filter).returns(@exception.backtrace.take(2))
+
       @mail = @email_notifier.create_email(@exception,
         :data => {:job => 'DivideWorkerJob', :payload => '1/0', :message => 'My Custom Message'})
     end
+  end
+
+  teardown do
+    ExceptionNotifier.clean_backtrace = @clean_backtrace
   end
 
   test "should have default sender address overridden" do
@@ -113,8 +124,24 @@ class EmailNotifierTest < ActiveSupport::TestCase
     assert @vowel_mail.encoded.include? "An ActiveRecord::RecordNotFound occurred in background at #{Time.current}"
   end
 
-  test "mail should contain backtrace in body" do
-    assert @mail.encoded.include?("test/exception_notifier/email_notifier_test.rb:8"), "\n#{@mail.inspect}"
+  test "mail should contain cleaned backtrace in body" do
+    assert_include @mail.encoded, @exception.backtrace[0], "\n#{@mail}"
+    assert_include @mail.encoded, @exception.backtrace[1], "\n#{@mail}"
+
+    assert_not_include @mail.encoded, @exception.backtrace[2], "\n#{@mail}"
+    assert_not_include @mail.encoded, @exception.backtrace[-1], "\n#{@mail}"
+  end
+
+  test "mail should contain uncleaned backtrace in body if backtrace cleaning is disabled" do
+    ExceptionNotifier.clean_backtrace = false
+
+    @mail = @email_notifier.create_email(@exception,
+      :data => {:job => 'DivideWorkerJob', :payload => '1/0', :message => 'My Custom Message'})
+
+    assert_include @mail.encoded, @exception.backtrace[0], "\n#{@mail.inspect}"
+    assert_include @mail.encoded, @exception.backtrace[1], "\n#{@mail.inspect}"
+    assert_include @mail.encoded, @exception.backtrace[2], "\n#{@mail.inspect}"
+    assert_include @mail.encoded, @exception.backtrace[-1], "\n#{@mail.inspect}"
   end
 
   test "mail should contain data in body" do
