@@ -5,6 +5,8 @@ module ExceptionNotification
 
       ExceptionNotifier.ignored_exceptions = options.delete(:ignore_exceptions) if options.key?(:ignore_exceptions)
 
+      ExceptionNotifier.clean_backtrace = options.delete(:clean_backtrace) if options.key?(:clean_backtrace)
+
       if options.key?(:ignore_if)
         rack_ignore = options.delete(:ignore_if)
         ExceptionNotifier.ignore_if do |exception, options|
