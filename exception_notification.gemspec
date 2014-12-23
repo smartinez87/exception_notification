@@ -21,10 +21,10 @@ Gem::Specification.new do |s|
 
   s.add_development_dependency "rails", ">= 3.0.4"
   s.add_development_dependency "resque", "~> 1.2.0"
-  if RUBY_VERSION > "1.9"
-    s.add_development_dependency "sidekiq", "~> 3.3"
+  if RUBY_VERSION < "2.0"
+    s.add_development_dependency "sidekiq", "~> 3.2.6"
   else
-    s.add_development_dependency "sidekiq", "~> 3.2.6"  
+    s.add_development_dependency "sidekiq", "~> 3.3"
   end
   s.add_development_dependency "tinder", "~> 1.8"
   s.add_development_dependency "httparty", "~> 0.10.2"
