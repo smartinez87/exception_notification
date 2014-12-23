@@ -24,7 +24,7 @@ Gem::Specification.new do |s|
   if RUBY_VERSION > "2.0"
     s.add_development_dependency "sidekiq", "~> 3.3"
   else
-    s.add_development_dependency "sidekiq", "~> 3.2.6"
+    s.add_development_dependency "sidekiq", "~> 2.17.8"
   end
   s.add_development_dependency "tinder", "~> 1.8"
   s.add_development_dependency "httparty", "~> 0.10.2"
