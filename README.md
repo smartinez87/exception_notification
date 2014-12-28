@@ -565,17 +565,17 @@ To configure it, you need to set at least the 'team' and 'token' options, like t
 
 ```ruby
 Whatever::Application.config.middleware.use ExceptionNotification::Rack,
-  :email => {
-    :email_prefix => "[Whatever] ",
-    :sender_address => %{"notifier" <notifier@example.com>},
-    :exception_recipients => %w{exceptions@example.com}
+  email: {
+    email_prefix: "[Whatever] ",
+    sender_address: %{"notifier" <notifier@example.com>},
+    exception_recipients: %w{exceptions@example.com}
   },
-  :slack => {
-    :webhook_url => "[Your webhook url]",
-    :channel => "#exceptions",
-    :additional_parameters => {
-      :icon_url => "http://image.jpg"
-    }
+  slack: {
+    webhook_url: "[Your webhook url]",
+    channel: '#channel-name',
+    username: 'Exception Notification',
+    icon_emoji: ':ghost:',
+    color: 'danger'
   }
 ```
 
