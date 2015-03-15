@@ -41,7 +41,7 @@ module ExceptionNotifier
 
             @exception = exception
             @options   = options.reverse_merge(default_options)
-            @backtrace = exception.backtrace || []
+            @backtrace = exception.backtrace ? clean_backtrace(exception) : []
             @sections  = @options[:background_sections]
             @data      = options[:data] || {}
 
@@ -66,7 +66,7 @@ module ExceptionNotifier
           end
 
           def clean_backtrace(exception)
-            if defined?(Rails) && Rails.respond_to?(:backtrace_cleaner)
+            if ExceptionNotifier.clean_backtrace && defined?(Rails) && Rails.respond_to?(:backtrace_cleaner)
               Rails.backtrace_cleaner.send(:filter, exception.backtrace)
             else
               exception.backtrace

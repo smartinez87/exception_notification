@@ -22,6 +22,10 @@ module ExceptionNotifier
   mattr_accessor :ignored_exceptions
   @@ignored_exceptions = %w{ActiveRecord::RecordNotFound AbstractController::ActionNotFound ActionController::RoutingError ActionController::UnknownFormat}
 
+  # Setting for whether backtraces should be cleaned in the EmailNorifier
+  mattr_accessor :clean_backtrace
+  @@clean_backtrace = true
+
   class << self
     # Store conditions that decide when exceptions must be ignored or not.
     @@ignores = []
