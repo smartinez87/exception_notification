@@ -1,3 +1,5 @@
+# encoding: utf-8
+
 require "active_support/core_ext/hash/reverse_merge"
 require 'action_mailer'
 require 'action_dispatch'
@@ -74,8 +76,9 @@ module ExceptionNotifier
               when Hash, Array
                 object.inspect
               else
-                object.to_s
-            end
+                object_str = object.to_s
+                object_str.frozen? ? object_str.dup : object_str
+            end.force_encoding(self.headers[:charset] || 'UTF-8')
           end
 
           def html_mail?

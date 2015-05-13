@@ -1,10 +1,10 @@
-* URL        : <%= raw @request.url %>
-* HTTP Method: <%= raw @request.request_method %>
-* IP address : <%= raw @request.remote_ip %>
-* Parameters : <%= raw @request.filtered_parameters.inspect %>
-* Timestamp  : <%= raw Time.current %>
-* Server : <%= raw Socket.gethostname %>
+* URL         : <%= raw inspect_object(@request.url) %>
+* HTTP Method : <%= raw @request.request_method %>
+* IP address  : <%= raw @request.remote_ip %>
+* Parameters  : <%= raw inspect_object(@request.filtered_parameters) %>
+* Timestamp   : <%= raw Time.current %>
+* Server      : <%= raw Socket.gethostname %>
 <% if defined?(Rails) && Rails.respond_to?(:root) %>
-* Rails root : <%= raw Rails.root %>
+* Rails root  : <%= raw Rails.root %>
 <% end %>
-* Process: <%= raw $$ %>
+* Process     : <%= raw $$ %>
