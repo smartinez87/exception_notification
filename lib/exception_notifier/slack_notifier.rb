@@ -1,65 +1,60 @@
 module ExceptionNotifier
   class SlackNotifier
     include ExceptionNotifier::BacktraceCleaner
-
-    attr_accessor :notifier
+    DEFAULT_OPTIONS = {
+      username: 'Exception Notifier',
+      icon_emoji: ':fire:'
+    }
+    attr_accessor :slack_options
 
     def initialize(options)
-      begin
-        @ignore_data_if = options[:ignore_data_if]
-
-        webhook_url = options.fetch(:webhook_url)
-        @message_opts = options.fetch(:additional_parameters, {})
-        @notifier = Slack::Notifier.new webhook_url, options
-      rescue
-        @notifier = nil
-      end
+      self.slack_options = options
     end
 
-    def call(exception, options={})
-      message = "An exception occurred: '#{exception.message}' on '#{exception.backtrace.first}'"
-
-      message = enrich_message_with_data(message, options)
-      message = enrich_message_with_backtrace(message, exception)
-
-      @notifier.ping(message, @message_opts) if valid?
+    def call(exception, options = {})
+      env = options.fetch(:env, {})
+      request = (env['REQUEST_METHOD'] ? ActionDispatch::Request.new(env) : nil)
+      notifier.ping '', message_options(exception, request)
     end
 
-    protected
+    private
 
-    def valid?
-      !@notifier.nil?
+    def notifier
+      @notifier ||= Slack::Notifier.new slack_options.fetch(:webhook_url)
     end
 
-    def enrich_message_with_data(message, options)
-      def deep_reject(hash, block)
-        hash.each do |k, v|
-          if v.is_a?(Hash)
-            deep_reject(v, block)
-          end
-
-          if block.call(k, v)
-            hash.delete(k)
-          end
-        end
-      end
-
-      data = ((options[:env] || {})['exception_notifier.exception_data'] || {}).merge(options[:data] || {})
-      deep_reject(data, @ignore_data_if) if @ignore_data_if.is_a?(Proc)
-      text = data.map{|k,v| "#{k}: #{v}"}.join(', ')
-
-      if text.present?
-        text = ['*Data:*', text].join("\n")
-        [message, text].join("\n")
-      else
-        message
-      end
+    def message_options(exception, request)
+      title = "#{request.request_method} #{request.original_url}" if request
+      options = DEFAULT_OPTIONS.merge(slack_options.slice(:channel, :username, :icon_emoji))
+      options[:attachments] = [{
+        color: 'danger',
+        title: title,
+        text: exception.message,
+        fields: attachment_fields(exception, request),
+        mrkdwn_in: %w(text title fallback fields)
+      }]
+      options
     end
 
-    def enrich_message_with_backtrace(message, exception)
-      backtrace = clean_backtrace(exception).first(10).join("\n")
-      [message, ['*Backtrace:*', backtrace]].join("\n")
+    # see https://api.slack.com/docs/attachments
+    def attachment_fields(exception, request)
+      backtrace = clean_backtrace(exception).first(10).map { |s| "> #{s}" }.join("\n")
+      fields = [
+        attachment_field('Project', Rails.application.class.parent_name, short: true),
+        attachment_field('Environment', Rails.env, short: true),
+        attachment_field('Time', Time.zone.now.strftime('%Y-%m-%d %H:%M:%S'), short: true),
+        attachment_field('Backtrace', backtrace, short: false)
+      ]
+      fields << attachment_field('Parameters', request.filtered_parameters.map { |k, v| "> #{k}=#{v}" }.join("\n"), short: false) if request
+      fields
     end
 
+    def attachment_field(title, value, short: false)
+      {
+        title: title,
+        value: value,
+        short: short
+      }
+    end
   end
 end
