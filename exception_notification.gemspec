@@ -21,7 +21,11 @@ Gem::Specification.new do |s|
 
   s.add_development_dependency "rails", "~> 4.0"
   s.add_development_dependency "resque", "~> 1.2.0"
-  s.add_development_dependency "sidekiq", "~> 3.0"
+  if RUBY_VERSION > "2.0"
+    s.add_development_dependency "sidekiq", "~> 3.3"
+  else
+    s.add_development_dependency "sidekiq", "~> 2.17.8"
+  end
   s.add_development_dependency "tinder", "~> 1.8"
   s.add_development_dependency "httparty", "~> 0.10.2"
   s.add_development_dependency "mocha", ">= 0.13.0"
