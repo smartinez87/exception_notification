@@ -2,7 +2,7 @@ language: ruby
 rvm:
   - 2.0.0
   - 2.1
-  - 2.2
+  - 2.2.4
   - 2.3.0
 install:
   - "gem install bundler"
@@ -11,3 +11,18 @@ gemfile:
   - gemfiles/rails4_0.gemfile
   - gemfiles/rails4_1.gemfile
   - gemfiles/rails4_2.gemfile
+  - gemfiles/rails5_0.gemfile
+  - gemfiles/rails_edge.gemfile
+matrix:
+  exclude:
+    - rvm: 2.0.0
+      gemfile: gemfiles/rails5_0.gemfile
+    - rvm: 2.1
+      gemfile: gemfiles/rails5_0.gemfile
+    - rvm: 2.0.0
+      gemfile: gemfiles/rails_edge.gemfile
+    - rvm: 2.1
+      gemfile: gemfiles/rails_edge.gemfile
+  allow_failures:
+    - gemfile: gemfiles/rails_edge.gemfile
+  fast_finish: true

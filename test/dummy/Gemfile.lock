@@ -2,11 +2,11 @@ PATH
   remote: ../../..
   specs:
     exception_notification (4.1.4)
-      actionmailer (~> 4.0)
-      activesupport (~> 4.0)
+      actionmailer (>= 4.0, < 6)
+      activesupport (>= 4.0, < 6)
 
 GEM
-  remote: http://rubygems.org/
+  remote: https://rubygems.org/
   specs:
     actionmailer (4.2.0)
       actionpack (= 4.2.0)
@@ -135,3 +135,6 @@ DEPENDENCIES
   rails (= 4.2.0)
   sqlite3
   tinder
+
+BUNDLED WITH
+   1.11.2
