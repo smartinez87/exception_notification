@@ -334,6 +334,34 @@ The API token to allow access to your Campfire account.
 
 For more options to set Campfire, like _ssl_, check [here](https://github.com/collectiveidea/tinder/blob/master/lib/tinder/campfire.rb#L17).
 
+### Fail2ban notifier
+
+This notifier creates a log file you can then parse with [fail2ban](http://www.fail2ban.org/)
+
+#### Usage
+
+To configure the notifier, you don't need anything, although you can customise the `logifile` value, like this:
+
+```ruby
+Whatever::Application.config.middleware.use ExceptionNotification::Rack,
+  :email => {
+    :email_prefix => "[Whatever] ",
+    :sender_address => %{"notifier" <notifier@example.com>},
+    :exception_recipients => %w{exceptions@example.com}
+  },
+  :fail2ban => {
+    :logfile => '/path/to/logs/fail2ban.log'
+  }
+```
+
+#### Options
+
+##### logfile
+
+*String, not required*
+
+An alternative log file location. By default Rails.root.join('log', 'fail2ban.log')
+
 
 ### HipChat notifier
 
