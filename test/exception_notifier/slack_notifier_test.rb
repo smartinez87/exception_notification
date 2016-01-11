@@ -59,6 +59,18 @@ class SlackNotifierTest < ActiveSupport::TestCase
     assert_equal slack_notifier.notifier.username, options[:username]
   end
 
+  test "should send the notification with specific backtrace lines" do
+    options = {
+      webhook_url: "http://slack.webhook.url",
+      backtrace_lines: 1
+    }
+
+    Slack::Notifier.any_instance.expects(:ping).with('', fake_notification(@exception, nil, 1))
+
+    slack_notifier = ExceptionNotifier::SlackNotifier.new(options)
+    slack_notifier.call(@exception)
+  end
+
   test "should pass the additional parameters to Slack::Notifier.ping" do
     options = {
       webhook_url: "http://slack.webhook.url",
@@ -153,11 +165,14 @@ class SlackNotifierTest < ActiveSupport::TestCase
     StandardError.new('my custom error')
   end
 
-  def fake_notification(exception=@exception, data_string=nil)
+  def fake_notification(exception=@exception, data_string=nil, expected_backtrace_lines=nil)
     text = "*An exception occurred while doing*: ` <>`\n"
 
     fields = [ { title: 'Exception', value: exception.message} ]
-    fields.push({ title: 'Backtrace', value: "```backtrace line 1\nbacktrace line 2```" }) if exception.backtrace
+    if exception.backtrace
+      formatted_backtrace = expected_backtrace_lines ? "```#{exception.backtrace.first(expected_backtrace_lines).join("\n")}```" : "```#{exception.backtrace.join("\n")}```"
+      fields.push({ title: 'Backtrace', value: formatted_backtrace }) if exception.backtrace
+    end
     fields.push({ title: 'Data', value: "```#{data_string}```" }) if data_string
 
     { attachments: [ color: 'danger', text: text, fields: fields, mrkdwn_in: %w(text fields) ] }
