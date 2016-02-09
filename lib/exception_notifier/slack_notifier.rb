@@ -18,14 +18,16 @@ module ExceptionNotifier
     end
 
     def call(exception, options={})
+      title = "*#{exception.class.to_s =~ /^[aeiou]/i ? 'An' : 'A'}* `#{exception.class.to_s}`"
+
       if options[:env].nil?
         data = options[:data] || {}
-        text = "*#{exception.class.to_s =~ /^[aeiou]/i ? 'An' : 'A'}* `#{exception.class.to_s}` *occured in background*\n"
+        text = "#{title} *occured in background*\n"
       else
         env = options[:env] || {}
         title = "#{env['REQUEST_METHOD']} <#{env['REQUEST_URI']}>"
         data = (env['exception_notifier.exception_data'] || {}).merge(options[:data] || {})
-        text = "*An exception occurred while doing*: `#{title}`\n"
+        text = "*#{title} *occurred while doing:* `#{title}`\n"
       end
 
       clean_message = exception.message.gsub("`", "'")
