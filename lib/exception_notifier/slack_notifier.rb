@@ -25,9 +25,9 @@ module ExceptionNotifier
         text = "#{title} *occured in background*\n"
       else
         env = options[:env] || {}
-        title = "#{env['REQUEST_METHOD']} <#{env['REQUEST_URI']}>"
+        what = "#{env['REQUEST_METHOD']} <#{env['REQUEST_URI']}>"
         data = (env['exception_notifier.exception_data'] || {}).merge(options[:data] || {})
-        text = "*#{title} *occurred while doing:* `#{title}`\n"
+        text = "#{title} *occurred while doing:* `#{what}`\n"
       end
 
       clean_message = exception.message.gsub("`", "'")
