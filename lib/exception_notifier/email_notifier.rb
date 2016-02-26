@@ -45,7 +45,7 @@ module ExceptionNotifier
 
             @exception = exception
             @options   = options.reverse_merge(default_options)
-            @backtrace = exception.backtrace || []
+            @backtrace = exception.backtrace ? clean_backtrace(exception) : []
             @sections  = @options[:background_sections]
             @data      = options[:data] || {}
 
