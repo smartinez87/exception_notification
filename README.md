@@ -89,6 +89,7 @@ ExceptionNotification relies on notifiers to deliver notifications when errors o
 * [IRC notifier](#irc-notifier)
 * [Slack notifier](#slack-notifier)
 * [WebHook notifier](#webhook-notifier)
+* [GitHub notifier](#github-notifier)
 
 But, you also can easily implement your own [custom notifier](#custom-notifier).
 
@@ -649,6 +650,68 @@ Rails.application.config.middleware.use ExceptionNotification::Rack,
 ```
 
 For more HTTParty options, check out the [documentation](https://github.com/jnunemaker/httparty).
+
+### GitHub notifier
+
+This notifier sends notifications, creating issues on GitHub.
+
+#### Usage
+
+Just add the [octokit](https://github.com/github/octokit) gem to your `Gemfile`:
+
+```ruby
+gem 'octokit'
+```
+
+To configure it, you need to set the `repo`, `login` and `password` options, like this:
+
+```ruby
+Rails.application.config.middleware.use ExceptionNotification::Rack,
+  :email => {
+    :email_prefix => "[PREFIX] ",
+    :sender_address => %{"notifier" <notifier@example.com>},
+    :exception_recipients => %w{exceptions@example.com}
+  },
+  :github => {
+    :prefix => "[PREFIX] ",
+    :repo => 'owner/repo',
+    :login => ENV['GITHUB_LOGIN'],
+    :password => ENV['GITHUB_PASSWORD']
+  }
+```
+
+#### Options
+
+##### repo
+
+*String, required*
+
+The repo owner and repo name, separated by a forward slash.
+
+##### login
+
+*String, required*
+
+A GitHub username with access rights to the repo
+
+##### password
+
+*String, required*
+
+The username's password.
+
+##### prefix
+
+*String, optional*
+
+A prefix prepended to the issue title.
+
+##### other options
+
+Authentication using OAuth tokens are not (yet) supported.
+
+Assignee, milestone and labels are not (yet) supported.
+
 
 ### Custom notifier
 
