@@ -80,7 +80,7 @@ class EmailNotifierTest < ActiveSupport::TestCase
       ExceptionNotifier::EmailNotifier.normalize_digits('1 foo 12 bar 123 baz 1234')
   end
 
-  test "mail should be plain text and UTF-8 enconded by default" do
+  test "mail should be plain text and UTF-8 encoded by default" do
     assert_equal @mail.content_type, "text/plain; charset=UTF-8"
   end
 
