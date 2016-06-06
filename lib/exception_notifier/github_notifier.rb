@@ -64,38 +64,39 @@ module ExceptionNotifier
     def compose_environment_section
       out = sub_title('Environment')
       max = @environment.keys.map(&:to_s).max { |a, b| a.length <=> b.length }
+      out << "<pre>"
       @environment.keys.map(&:to_s).sort.each do |key|
-        out << "* `#{"%-*s: %s" % [max.length, key, inspect_object(@environment[key])]}`\n"
+        out << "* #{"%-*s: %s" % [max.length, key, inspect_object(@environment[key])]}\n"
       end
-      out << "\n"
+      out << "</pre>"
     end
 
     def compose_header
       header = @exception.class.to_s =~ /^[aeiou]/i ? 'An' : 'A'
       header << format(" %s occurred", @exception.class.to_s)
       if @kontroller
-        header << format("in %s#%s",
+        header << format(" in %s#%s",
                          @kontroller.controller_name,
                          @kontroller.action_name)
       end
       header << format(":\n\n")
-      header << "`#{@exception.message}\n"
-      header << "#{@exception.backtrace.first}`\n\n"
+      header << "<pre>#{@exception.message}\n"
+      header << "#{@exception.backtrace.first}</pre>"
     end
 
     def compose_request_section
       return '' if @request_hash.empty?
       out = sub_title('Request')
-      out << "* URL        : `#{@request_hash[:url]}`\n"
-      out << "* HTTP Method: `#{@request_hash[:http_method]}`\n"
-      out << "* IP address : `#{@request_hash[:ip_address]}`\n"
-      out << "* Parameters : `#{@request_hash[:parameters].inspect}`\n"
-      out << "* Timestamp : `#{@request_hash[:timestamp]}`\n"
-      out << "* Server : `#{Socket.gethostname}`\n"
+      out << "<pre>* URL        : #{@request_hash[:url]}\n"
+      out << "* HTTP Method: #{@request_hash[:http_method]}\n"
+      out << "* IP address : #{@request_hash[:ip_address]}\n"
+      out << "* Parameters : #{@request_hash[:parameters].inspect}\n"
+      out << "* Timestamp : #{@request_hash[:timestamp]}\n"
+      out << "* Server : #{Socket.gethostname}\n"
       if defined?(Rails) && Rails.respond_to?(:root)
-        out << "* Rails root : `#{Rails.root}`\n"
+        out << "* Rails root : #{Rails.root}\n"
       end
-      out << "* Process : `#{$$}`\n\n"
+      out << "* Process : #{$$}</pre>"
     end
 
     def compose_session_section
@@ -106,8 +107,8 @@ module ExceptionNotifier
              rack_session_id = (@request.env["rack.session.options"] and @request.env["rack.session.options"][:id])
              (@request.session['session_id'] || rack_session_id).inspect
            end
-      out << format("* session id: `%s`\n", id)
-      out << "* data: `#{PP.pp(@request.session.to_hash, '')}`\n\n"
+      out << format("<pre>* session id: %s\n", id)
+      out << "* data: #{PP.pp(@request.session.to_hash, '')}</pre>"
     end
 
     def compose_title
