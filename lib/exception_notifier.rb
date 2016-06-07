@@ -28,6 +28,9 @@ module ExceptionNotifier
   mattr_accessor :testing_mode
   @@testing_mode = false
 
+  mattr_accessor :clean_backtrace
+  @@clean_backtrace = true
+
   class << self
     # Store conditions that decide when exceptions must be ignored or not.
     @@ignores = []
