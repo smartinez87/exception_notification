@@ -30,7 +30,7 @@
       <tr>
         <td style="padding: 10px; border: 1px solid #eed3d7; background-color: #f2dede">
           <h3 style="color: #b94a48">
-            <%= @exception.class.to_s =~ /^[aeiou]/i ? 'An' : 'A' %> <%= @exception.class %> occurred in background at <%= Time.current %> :
+            <%= @exception.class.to_s =~ /^[aeiou]/i ? 'An' : 'A' %> <%= @exception.class %> occurred in background at <%= Time.now %> :
           </h3>
           <p style="color: #b94a48"><%= @exception.message %></p>
           <pre style="font-size: 12px; padding: 5px; background-color:#f5f5f5">
