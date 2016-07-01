@@ -2,7 +2,8 @@ require 'test_helper'
 
 class PostsControllerTest < ActionController::TestCase
   setup do
-    Time.stubs(:current).returns('Sat, 20 Apr 2013 20:58:55 UTC +00:00')
+    travel_to Time.new('Sat, 20 Apr 2013 20:58:55 UTC +00:00')
+    @email_notifier = ExceptionNotifier.registered_exception_notifier(:email)
     begin
       @post = posts(:one)
       post :create, method: :post, params: @post.attributes
@@ -144,7 +145,7 @@ class PostsControllerTestWithoutVerboseSubject < ActionController::TestCase
   end
 
   test "should not include exception message in subject" do
-    assert_equal "[ERROR] # (NoMethodError)", @mail.subject
+    assert_equal "[ERROR] posts#create (NoMethodError)", @mail.subject
   end
 end
 
