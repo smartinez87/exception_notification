@@ -102,7 +102,7 @@ module ExceptionNotifier
     def compose_session_section
       out = sub_title('Session')
       id = if @request.ssl?
-             out << "[FILTERED]"
+             '[FILTERED]'
            else
              rack_session_id = (@request.env["rack.session.options"] and @request.env["rack.session.options"][:id])
              (@request.session['session_id'] || rack_session_id).inspect
