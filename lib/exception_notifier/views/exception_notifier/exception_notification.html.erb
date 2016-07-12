@@ -39,7 +39,7 @@
         </td>
       </tr>
       <% if @sections_content.size > 4096 %> 
-     <%= truncate (@sections_content, ;size => 4096) %>
+     <%= truncate (@sections_content, :size => 4096) %>
       
       
       <% else %>
