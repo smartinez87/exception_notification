@@ -41,7 +41,7 @@
       <%if @sections_content.size>4096%> 
      <%=truncate(@sections_content, ;size=>4096) %>
       
-      end
+      
       <%else%>
       <% sections_content.each do |title, summary| %>
       
@@ -59,3 +59,4 @@
 
   </body>
 </html>
+<%end%>
