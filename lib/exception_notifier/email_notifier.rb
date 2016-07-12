@@ -3,6 +3,7 @@ require 'active_support/core_ext/time'
 require 'action_mailer'
 require 'action_dispatch'
 require 'pp'
+require 'objspace'
 
 module ExceptionNotifier
   class EmailNotifier < BaseNotifier
