@@ -6,7 +6,7 @@ require 'pp'
 
 module ExceptionNotifier
   class EmailNotifier < BaseNotifier
-    attr_accessor(:Sender_address, :exception_recipients,
+    attr_accessor(:sender_address, :exception_recipients,
     :pre_callback, :post_callback,
     :email_prefix, :email_format, :sections, :background_sections,
     :verbose_subject, :normalize_subject, :delivery_method, :mailer_settings,
