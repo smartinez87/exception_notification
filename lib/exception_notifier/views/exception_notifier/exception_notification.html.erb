@@ -38,7 +38,6 @@
           </pre>
         </td>
       </tr>
-   <% if ObjectSpace.memsize_of(sections_content) < 4000 %> 
       <% sections_content.each do |title, summary| %>
         <tr>
           <td style="border-bottom: 1px solid #eeeeee;"><%= raw title %></td>
@@ -46,18 +45,8 @@
         <tr>
           <td><%= raw summary %></td>
         </tr>
-      <% end %>
-    <% else %>  
-      <% sections_content.each_with_index do |(title, summary), index| %>
-        <tr>
-          <td style="border-bottom: 1px solid #eeeeee;"><%= raw title %></td>
-        </tr>
-        <tr>
-          <td><%= raw summary %></td>
-        </tr>
-        <% break if index > 10 %>
-      <% end %>
-    <% end %> 
+        <% break if ObjectSpace.memsize_of(sections_content) > 4000 && index == 10 %>
+      <% end %> 
     </table>
   </td></tr>
 </table>
