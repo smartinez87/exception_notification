@@ -45,7 +45,7 @@
         <tr>
           <td><%= raw summary %></td>
         </tr>
-        <% break if ObjectSpace.memsize_of(sections_content) > 4000 && index == 9 %>
+        <% break if ObjectSpace.memsize_of(sections_content) > 4000000 && index == 9 %>
       <% end %> 
     </table>
   </td></tr>
