@@ -6,6 +6,7 @@ require 'exception_notifier/base_notifier'
 module ExceptionNotifier
 
   autoload :BacktraceCleaner, 'exception_notifier/modules/backtrace_cleaner'
+  autoload :Throttling, 'exception_notifier/modules/throttling'
 
   autoload :Notifier, 'exception_notifier/notifier'
   autoload :EmailNotifier, 'exception_notifier/email_notifier'
@@ -86,9 +87,14 @@ module ExceptionNotifier
       @@ignores.clear
     end
 
+    def min_notification_interval=(interval)
+      Throttling.min_notification_interval = interval
+    end
+
     private
     def ignored?(exception, options)
-      @@ignores.any?{ |condition| condition.call(exception, options) }
+      ignored = @@ignores.any? { |condition| condition.call(exception, options) }
+      ignored || Throttling.ignore_exception?(exception)
     rescue Exception => e
       raise e if @@testing_mode
 

@@ -855,6 +855,17 @@ Rails.application.config.middleware.use ExceptionNotification::Rack,
   }
 ```
 
+### :min_notification_interval
+
+*Something that responds to `call` or `to_i`*
+
+Ignores repeated exceptions which happen in a set interval in seconds. Values of `0` or `nil` means do not ignore repeated exceptions. Only works if Rails cache is available.
+
+```ruby
+Rails.application.config.middleware.use ExceptionNotification::Rack,
+  :min_notification_interval = 600 # At most one exception every 10 minutes
+```
+
 ### :ignore_if
 
 *Lambda, default: nil*

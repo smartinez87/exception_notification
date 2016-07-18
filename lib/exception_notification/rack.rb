@@ -5,7 +5,13 @@ module ExceptionNotification
     def initialize(app, options = {})
       @app = app
 
-      ExceptionNotifier.ignored_exceptions = options.delete(:ignore_exceptions) if options.key?(:ignore_exceptions)
+      if options.key?(:ignore_exceptions)
+        ExceptionNotifier.ignored_exceptions = options.delete(:ignore_exceptions)
+      end
+
+      if options.key?(:min_notification_interval)
+        ExceptionNotifier.min_notification_interval = options.delete(:min_notification_interval)
+      end
 
       if options.key?(:ignore_if)
         rack_ignore = options.delete(:ignore_if)
