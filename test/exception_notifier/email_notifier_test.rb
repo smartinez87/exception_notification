@@ -169,7 +169,19 @@ class EmailNotifierTest < ActiveSupport::TestCase
 
     assert_match /invalid_encoding\s+: R__sum__/, mail.encoded
   end
+  
+  test "should shrink sections_contents size if its bytesize is greater than 4mb" do
+    email_notifier = ExceptionNotifier::EmailNotifier.new(
+      :sender_address => "<dummynotifier@example.com>",
+      :exception_recipients => %w{dummyexceptions@example.com},
+      :deliver_with => :deliver_now
+    )
 
+    email_notifier.shrink_section
+    
+    assert_equal (10,sections_content.size)
+
+  end
   test "should send email using ActionMailer" do
     ActionMailer::Base.deliveries.clear
 
