@@ -56,7 +56,26 @@ module ExceptionNotifier
 
             compose_email
           end
+          
+          def render_section(section)
+              RAILS_DEFAULT_LOGGER.info("rendering section #{section.inspect}")
+              summary = render_overridable(section).strip
+              unless summary.blank?
+              title = render_overridable(:title, :locals => { :title => section }).strip
+             "#{title}\n\n#{summary.gsub(/^/, "  ")}\n\n"
+              end
+          end
 
+        def render_overridable(partial, options={})
+             if File.exist?(path = "#{APP_PATH}/_#{partial}.html.erb") ||
+             File.exist?(path = "#{File.dirname(__FILE__)}/../#{VIEW_PATH}/_#{partial}.html.erb") ||
+             File.exist?(path = "#{APP_PATH}/_#{partial}.rhtml") ||
+             File.exist?(path = "#{APP_PATH}/_#{partial}.erb")
+          render(options.merge(:file => path, :use_full_path => false))
+          else
+            ""
+          end
+       end
           private
 
           def compose_subject
