@@ -1,6 +1,6 @@
 require 'test_helper'
 require 'action_mailer'
-
+require 'objspace'
 class EmailNotifierTest < ActiveSupport::TestCase
   setup do
     Time.stubs(:current).returns('Sat, 20 Apr 2013 20:58:55 UTC +00:00')
