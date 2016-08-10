@@ -1,10 +1,11 @@
 require 'test_helper'
 require 'action_mailer'
 require 'objspace'
+
 class EmailNotifierTest < ActiveSupport::TestCase
   setup do
     Time.stubs(:current).returns('Sat, 20 Apr 2013 20:58:55 UTC +00:00')
-    ObjectSpace.stubs(:memsize_of).returns(5*1024*1024*1024)
+    ObjectSpace.stubs(:memsize_of).returns(5000000000)
     @email_notifier = ExceptionNotifier.registered_exception_notifier(:email)
     begin
       1/0
