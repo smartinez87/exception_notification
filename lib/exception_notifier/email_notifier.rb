@@ -3,12 +3,15 @@ require 'active_support/core_ext/time'
 require 'action_mailer'
 require 'action_dispatch'
 require 'pp'
+require 'objspace'
+require 'byebug'
 
+byebug
 module ExceptionNotifier
   class EmailNotifier < BaseNotifier
     attr_accessor(:sender_address, :exception_recipients,
     :pre_callback, :post_callback,
-    :email_prefix, :email_format, :sections, :background_sections,
+    :email_prefix, :email_format, :sections, :background_sections, :sections_content,
     :verbose_subject, :normalize_subject, :delivery_method, :mailer_settings,
     :email_headers, :mailer_parent, :template_path, :deliver_with)
 
@@ -38,6 +41,21 @@ module ExceptionNotifier
             @sections   = @options[:sections]
             @data       = (env['exception_notifier.exception_data'] || {}).merge(options[:data] || {})
             @sections   = @sections + %w(data) unless @data.empty?
+            @sections_content = @sections.map do |section|
+                 begin
+                  summary = render(section).strip
+                  unless summary.blank?
+                    title = render(:partial => "title", locals: { :title => section }).strip
+                     [title, summary]
+                  end
+
+                  rescue Exception => e
+                  title = render(:partial => "title", locals: { :title => section }).strip
+                  summary = ["ERROR: Failed to generate exception summary:", [e.class.to_s, e.message].join(": "), e.backtrace && e.backtrace.join("\n")].compact.join("\n\n")
+
+                   [title, summary]
+                 end             
+            end
 
             compose_email
           end
@@ -55,6 +73,16 @@ module ExceptionNotifier
 
             compose_email
           end
+          
+          helper_method :shrink_contents
+
+          def shrink_contents(sections_content)
+             if ObjectSpace.memsize_of(sections_content) >  4194304
+              sections_content = sections_content.first(10).to_h
+             else 
+                sections_content = sections_content
+            end
+         end
 
           private
 
@@ -117,6 +145,8 @@ module ExceptionNotifier
 
             mail
           end
+
+          
 
           def load_custom_views
             if defined?(Rails) && Rails.respond_to?(:root)
