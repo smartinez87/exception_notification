@@ -2,7 +2,7 @@ require 'test_helper'
 
 class PostsControllerTest < ActionController::TestCase
   setup do
-    Time.stubs(:current).returns('Sat, 20 Apr 2013 20:58:55 UTC +00:00')
+    Time.stubs(:now).returns(Time.new(2013, 4, 20, 20, 58, 55, 0))
     @email_notifier = ExceptionNotifier.registered_exception_notifier(:email)
     begin
       @post = posts(:one)
@@ -46,7 +46,7 @@ class PostsControllerTest < ActionController::TestCase
   end
 
   test "mail should contain timestamp of exception in body" do
-    assert_includes @mail.encoded, "Timestamp  : #{Time.current}"
+    assert_includes @mail.encoded, "Timestamp  : #{Time.now}"
   end
 
   test "mail should contain the newly defined section" do

@@ -105,7 +105,7 @@ class EmailNotifierTest < ActiveSupport::TestCase
   end
 
   test "mail should say exception was raised in background at show timestamp" do
-    assert_includes @mail.encoded, "A ZeroDivisionError occurred in background at #{Time.current}"
+    assert_includes @mail.encoded, "A ZeroDivisionError occurred in background at #{Time.now}"
   end
 
   test "mail should prefix exception class with 'an' instead of 'a' when it starts with a vowel" do
@@ -116,7 +116,7 @@ class EmailNotifierTest < ActiveSupport::TestCase
       @vowel_mail = @email_notifier.create_email(@vowel_exception)
     end
 
-    assert_includes @vowel_mail.encoded, "An ActiveRecord::RecordNotFound occurred in background at #{Time.current}"
+    assert_includes @vowel_mail.encoded, "An ActiveRecord::RecordNotFound occurred in background at #{Time.now}"
   end
 
   test "mail should contain backtrace in body" do
