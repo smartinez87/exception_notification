@@ -101,7 +101,7 @@ class EmailNotifierTest < ActiveSupport::TestCase
   end
 
   test "mail should have a descriptive subject" do
-    assert_match /^\[Dummy ERROR\]\s+\(ZeroDivisionError\) "divided by 0"$/, @mail.subject
+    assert_match(/^\[Dummy ERROR\]\s+\(ZeroDivisionError\) "divided by 0"$/, @mail.subject)
   end
 
   test "mail should say exception was raised in background at show timestamp" do
@@ -140,12 +140,12 @@ class EmailNotifierTest < ActiveSupport::TestCase
     rescue => e
       @ignored_exception = e
       unless ExceptionNotifier.ignored_exceptions.include?(@ignored_exception.class.name)
-        @ignored_mail = @email_notifier.create_email(@ignored_exception)
+        ignored_mail = @email_notifier.create_email(@ignored_exception)
       end
     end
 
     assert_equal @ignored_exception.class.inspect, "ActiveRecord::RecordNotFound"
-    assert_nil @ignored_mail
+    assert_nil ignored_mail
   end
 
   test "should encode environment strings" do
@@ -165,7 +165,7 @@ class EmailNotifierTest < ActiveSupport::TestCase
       :email_format => :text
     )
 
-    assert_match /invalid_encoding\s+: R__sum__/, mail.encoded
+    assert_match(/invalid_encoding\s+: R__sum__/, mail.encoded)
   end
 
   test "should send email using ActionMailer" do
@@ -176,6 +176,27 @@ class EmailNotifierTest < ActiveSupport::TestCase
       :sender_address => %{"Dummy Notifier" <dummynotifier@example.com>},
       :exception_recipients => %w{dummyexceptions@example.com},
       :delivery_method => :test
+    )
+
+    email_notifier.call(@exception)
+
+    assert_equal 1, ActionMailer::Base.deliveries.count
+  end
+
+  test "should be able to specify ActionMailer::MessageDelivery method" do
+    ActionMailer::Base.deliveries.clear
+
+    if ActionMailer.version < Gem::Version.new("4.2")
+      deliver_with = :deliver
+    else
+      deliver_with = :deliver_now
+    end
+
+    email_notifier = ExceptionNotifier::EmailNotifier.new(
+      :email_prefix => '[Dummy ERROR] ',
+      :sender_address => %{"Dummy Notifier" <dummynotifier@example.com>},
+      :exception_recipients => %w{dummyexceptions@example.com},
+      :deliver_with => deliver_with
     )
 
     email_notifier.call(@exception)

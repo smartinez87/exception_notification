@@ -30,8 +30,9 @@ should submit a Pull Request!
   bundle
   cd test/dummy
   bundle
-  bundle exec rake db:reset
-  bundle exec rake db:test:prepare
+  bundle exec rake db:reset db:test:prepare
+  cd ../..
+  bundle exec rake test
   ```
 * Create a topic branch from where you want to base your work.
 * Add a test for your change. Only refactoring and documentation changes

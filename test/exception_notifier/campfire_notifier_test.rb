@@ -1,5 +1,11 @@
 require 'test_helper'
-require 'tinder'
+
+# silence_warnings trick around require can be removed once
+# https://github.com/collectiveidea/tinder/pull/77
+# gets merged and released
+silence_warnings do
+  require 'tinder'
+end
 
 class CampfireNotifierTest < ActiveSupport::TestCase
 
@@ -80,7 +86,7 @@ class CampfireNotifierTest < ActiveSupport::TestCase
   end
 
   def fake_exception
-    exception = begin
+    begin
       5/0
     rescue Exception => e
       e

@@ -1,10 +1,25 @@
-== undefined
+== 4.2.1
+
+* enhancements
+  * Allow customizable backtrace for Slack (by @aried3r)
+  * Add `Mongoid::Errors::DocumentNotFound` to ignored_exceptions (by @nazarok)
+  * Improved text in Slack notifier (by @vojtad)
+
+* bug fixes
+  * Fix data being sent on webhook notifier
+
+== 4.2.0
 
 * enhancements
   * update URL in gemspec (by @ktdreyer)
   * Add `hostname` to Slack notifier (by @juanazam)
   * Allow `exception_recipients` to be a proc (by @kellyjosephprice)
-  * Add `GithubNotifier` (by @sauy7)
+  * Add Mattermost integration (by @Aschen)
+  * Rails 5 compatible
+
+* bug fixes
+  * Fix error when showing timestamp on non Rails apps
+  * Fix delivery failure when deliver_with specified (by @grzuy)
 
 == 4.1.4
 

@@ -9,22 +9,22 @@ module ExceptionNotification
 
       if options.key?(:ignore_if)
         rack_ignore = options.delete(:ignore_if)
-        ExceptionNotifier.ignore_if do |exception, options|
-          options.key?(:env) && rack_ignore.call(options[:env], exception)
+        ExceptionNotifier.ignore_if do |exception, opts|
+          opts.key?(:env) && rack_ignore.call(opts[:env], exception)
         end
       end
 
       if options.key?(:ignore_crawlers)
         ignore_crawlers = options.delete(:ignore_crawlers)
-        ExceptionNotifier.ignore_if do |exception, options|
-          options.key?(:env) && from_crawler(options[:env], ignore_crawlers)
+        ExceptionNotifier.ignore_if do |exception, opts|
+          opts.key?(:env) && from_crawler(opts[:env], ignore_crawlers)
         end
       end
 
       @ignore_cascade_pass = options.delete(:ignore_cascade_pass) { true }
 
-      options.each do |notifier_name, options|
-        ExceptionNotifier.register_exception_notifier(notifier_name, options)
+      options.each do |notifier_name, opts|
+        ExceptionNotifier.register_exception_notifier(notifier_name, opts)
       end
     end
 

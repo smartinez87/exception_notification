@@ -60,6 +60,18 @@ class SlackNotifierTest < ActiveSupport::TestCase
     assert_equal slack_notifier.notifier.username, options[:username]
   end
 
+  test "should send the notification with specific backtrace lines" do
+    options = {
+      webhook_url: "http://slack.webhook.url",
+      backtrace_lines: 1
+    }
+
+    Slack::Notifier.any_instance.expects(:ping).with('', fake_notification(@exception, {}, nil, 1))
+
+    slack_notifier = ExceptionNotifier::SlackNotifier.new(options)
+    slack_notifier.call(@exception)
+  end
+
   test "should pass the additional parameters to Slack::Notifier.ping" do
     options = {
       webhook_url: "http://slack.webhook.url",
@@ -106,7 +118,7 @@ class SlackNotifierTest < ActiveSupport::TestCase
 
     expected_data_string = "foo: bar\njohn: doe\nuser_id: 5"
 
-    Slack::Notifier.any_instance.expects(:ping).with('', fake_notification(@exception, expected_data_string))
+    Slack::Notifier.any_instance.expects(:ping).with('', fake_notification(@exception, notification_options, expected_data_string))
     slack_notifier = ExceptionNotifier::SlackNotifier.new(options)
     slack_notifier.call(@exception, notification_options)
   end
@@ -165,12 +177,28 @@ class SlackNotifierTest < ActiveSupport::TestCase
     ]
   end
 
-  def fake_notification(exception = @exception, data_string = nil)
-    text = "*An exception occurred while doing*: ` <>`\n"
+  def fake_notification(exception = @exception, notification_options = {}, data_string = nil, expected_backtrace_lines = nil)
+    exception_name = "*#{exception.class.to_s =~ /^[aeiou]/i ? 'An' : 'A'}* `#{exception.class.to_s}`"
+    if notification_options[:env].nil?
+      text = "#{exception_name} *occured in background*"
+    else
+      env = notification_options[:env]
+
+      kontroller = env['action_controller.instance']
+      request = "#{env['REQUEST_METHOD']} <#{env['REQUEST_URI']}>"
+
+      text = "#{exception_name} *occurred while* `#{request}`"
+      text += " *was processed by* `#{kontroller.controller_name}##{kontroller.action_name}`" if kontroller
+    end
+
+    text += "\n"
 
     fields = [ { title: 'Exception', value: exception.message} ]
     fields.push({ title: 'Hostname', value: 'example.com' })
-    fields.push({ title: 'Backtrace', value: "```#{fake_backtrace.join("\n")}```" }) if exception.backtrace
+    if exception.backtrace
+      formatted_backtrace = expected_backtrace_lines ? "```#{exception.backtrace.first(expected_backtrace_lines).join("\n")}```" : "```#{exception.backtrace.join("\n")}```"
+      fields.push({ title: 'Backtrace', value: formatted_backtrace })
+    end
     fields.push({ title: 'Data', value: "```#{data_string}```" }) if data_string
 
     { attachments: [ color: 'danger', text: text, fields: fields, mrkdwn_in: %w(text fields) ] }

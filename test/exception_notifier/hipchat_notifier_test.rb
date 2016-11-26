@@ -1,5 +1,11 @@
 require 'test_helper'
-require 'hipchat'
+
+# silence_warnings trick around require can be removed once
+# https://github.com/hipchat/hipchat-rb/pull/174
+# gets merged and released
+silence_warnings do
+  require 'hipchat'
+end
 
 class HipchatNotifierTest < ActiveSupport::TestCase
 
@@ -152,7 +158,7 @@ class HipchatNotifierTest < ActiveSupport::TestCase
   end
 
   def fake_exception
-    exception = begin
+    begin
       5/0
     rescue Exception => e
       e
@@ -160,7 +166,7 @@ class HipchatNotifierTest < ActiveSupport::TestCase
   end
 
   def fake_exception_with_html_characters
-    exception = begin
+    begin
       raise StandardError.new('an error with <html> characters')
     rescue Exception => e
       e
