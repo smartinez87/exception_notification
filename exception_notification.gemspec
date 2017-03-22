@@ -1,7 +1,8 @@
 Gem::Specification.new do |s|
   s.name = 'exception_notification'
-  s.version = '4.1.4'
+  s.version = '4.2.1'
   s.authors = ["Jamis Buck", "Josh Peek"]
+  s.date = %q{2016-07-17}
   s.summary = "Exception notification for Rails apps"
   s.homepage = "https://smartinez87.github.io/exception_notification/"
   s.email = "smartinez87@gmail.com"
@@ -15,10 +16,10 @@ Gem::Specification.new do |s|
   s.test_files = `git ls-files -- test`.split("\n")
   s.require_path = 'lib'
 
-  s.add_dependency("actionmailer", "~> 4.0")
-  s.add_dependency("activesupport", "~> 4.0")
+  s.add_dependency("actionmailer", ">= 4.0", "< 6")
+  s.add_dependency("activesupport", ">= 4.0", "< 6")
 
-  s.add_development_dependency "rails", "~> 4.0"
+  s.add_development_dependency "rails", ">= 4.0", "< 6"
   s.add_development_dependency "resque", "~> 1.2.0"
   # Sidekiq 3.2.2 does not support Ruby 1.9.
   s.add_development_dependency "sidekiq", "~> 3.0.0", "< 3.2.2"

@@ -15,6 +15,7 @@ module ExceptionNotifier
   autoload :IrcNotifier, 'exception_notifier/irc_notifier'
   autoload :SlackNotifier, 'exception_notifier/slack_notifier'
   autoload :GithubNotifier, 'exception_notifier/github_notifier'
+  autoload :MattermostNotifier, 'exception_notifier/mattermost_notifier'
 
   class UndefinedNotifierError < StandardError; end
 
@@ -24,7 +25,7 @@ module ExceptionNotifier
 
   # Define a set of exceptions to be ignored, ie, dont send notifications when any of them are raised.
   mattr_accessor :ignored_exceptions
-  @@ignored_exceptions = %w{ActiveRecord::RecordNotFound AbstractController::ActionNotFound ActionController::RoutingError ActionController::UnknownFormat}
+  @@ignored_exceptions = %w{ActiveRecord::RecordNotFound Mongoid::Errors::DocumentNotFound AbstractController::ActionNotFound ActionController::RoutingError ActionController::UnknownFormat ActionController::UrlGenerationError}
 
   mattr_accessor :testing_mode
   @@testing_mode = false

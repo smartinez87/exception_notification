@@ -2,7 +2,7 @@
 * HTTP Method: <%= raw @request.request_method %>
 * IP address : <%= raw @request.remote_ip %>
 * Parameters : <%= raw safe_encode @request.filtered_parameters.inspect %>
-* Timestamp  : <%= raw Time.current %>
+* Timestamp  : <%= raw @timestamp %>
 * Server : <%= raw Socket.gethostname %>
 <% if defined?(Rails) && Rails.respond_to?(:root) %>
 * Rails root : <%= raw Rails.root %>

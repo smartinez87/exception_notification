@@ -53,13 +53,13 @@ class GithubNotifierTest < ActiveSupport::TestCase
     assert_includes github.title, '[Prefix]  (ZeroDivisionError)'
     assert_includes github.body, 'A ZeroDivisionError occurred:'
     assert_includes github.body, 'divided by 0'
-    assert_includes github.body, '## Request:'
-    assert_includes github.body, "* HTTP Method: `GET`"
-    assert_includes github.body, "## Session:"
-    assert_includes github.body, "* session id: `nil`"
-    assert_includes github.body, "## Environment:"
-    assert_includes github.body, "* `REQUEST_METHOD                            : GET`"
-    assert_includes github.body, "## Backtrace:"
+    assert_includes github.body, '-------------------- Request --------------------'
+    assert_includes github.body, "* HTTP Method: GET"
+    assert_includes github.body, "-------------------- Session --------------------"
+    assert_includes github.body, "* session id: nil"
+    assert_includes github.body, "-------------------- Environment --------------------"
+    assert_includes github.body, "* REQUEST_METHOD                            : GET"
+    assert_includes github.body, "-------------------- Backtrace --------------------"
     assert_includes github.body, "`fake_exception'"
   end
 

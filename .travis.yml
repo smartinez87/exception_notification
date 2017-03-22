@@ -1,9 +1,10 @@
 language: ruby
 rvm:
-  - 2.0.0
-  - 2.1
-  - 2.2
-  - 2.3.0
+  - 2.1.9
+  - 2.2.5
+  - 2.3.1
+env:
+- COVERALLS_SILENT=true
 install:
   - "gem install bundler"
   - "bundle install --jobs=3 --retry=3"
@@ -11,3 +12,8 @@ gemfile:
   - gemfiles/rails4_0.gemfile
   - gemfiles/rails4_1.gemfile
   - gemfiles/rails4_2.gemfile
+  - gemfiles/rails5_0.gemfile
+matrix:
+  exclude:
+    - rvm: 2.1.9
+      gemfile: gemfiles/rails5_0.gemfile

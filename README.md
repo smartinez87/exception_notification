@@ -9,7 +9,7 @@
 
 ---
 
-The Exception Notification gem provides a set of [notifiers](#notifiers) for sending notifications when errors occur in a Rack/Rails application. The built-in notifiers can deliver notifications by [email](#email-notifier), [Campfire](#campfire-notifier), [HipChat](#hipchat-notifier), [Slack](#slack-notifier), [IRC](#irc-notifier) or via custom [WebHooks](#webhook-notifier).
+The Exception Notification gem provides a set of [notifiers](#notifiers) for sending notifications when errors occur in a Rack/Rails application. The built-in notifiers can deliver notifications by [email](#email-notifier), [Campfire](#campfire-notifier), [HipChat](#hipchat-notifier), [Slack](#slack-notifier), [Mattermost](#mattermost-notifier), [IRC](#irc-notifier) or via custom [WebHooks](#webhook-notifier).
 
 There's a great [Railscast about Exception Notification](http://railscasts.com/episodes/104-exception-notifications-revised) you can see that may help you getting started.
 
@@ -37,6 +37,7 @@ ExceptionNotification is used as a rack middleware, or in the environment you wa
 ```ruby
 Rails.application.config.middleware.use ExceptionNotification::Rack,
   :email => {
+    :deliver_with => :deliver, # Rails >= 4.2.1 do not need this option since it defaults to :deliver_now
     :email_prefix => "[PREFIX] ",
     :sender_address => %{"notifier" <notifier@example.com>},
     :exception_recipients => %w{exceptions@example.com}
@@ -81,13 +82,14 @@ Options -> sections" below.
 
 ## Notifiers
 
-ExceptionNotification relies on notifiers to deliver notifications when errors occur in your applications. By default, six notifiers are available:
+ExceptionNotification relies on notifiers to deliver notifications when errors occur in your applications. By default, 7 notifiers are available:
 
 * [Campfire notifier](#campfire-notifier)
 * [Email notifier](#email-notifier)
 * [HipChat notifier](#hipchat-notifier)
 * [IRC notifier](#irc-notifier)
 * [Slack notifier](#slack-notifier)
+* [Mattermost notifier](#mattermost-notifier)
 * [WebHook notifier](#webhook-notifier)
 * [GitHub notifier](#github-notifier)
 
@@ -277,6 +279,12 @@ If enabled, include the exception message in the subject. Use `:verbose_subject 
 *Boolean, default: false*
 
 If enabled, remove numbers from subject so they thread as a single one. Use `:normalize_subject => true` to enable it.
+
+##### include_controller_and_action_names_in_subject
+
+*Boolean, default: true*
+
+If enabled, include the controller and action names in the subject. Use `:include_controller_and_action_names_in_subject => false` to exclude them.
 
 ##### email_format
 
@@ -589,6 +597,121 @@ more information. Default: 'incoming-webhook'
 
 Contains additional payload for a message (e.g avatar, attachments, etc). See [slack-notifier](https://github.com/stevenosloan/slack-notifier#additional-parameters) for more information.. Default: '{}'
 
+## Mattermost notifier
+
+Post notification in a mattermost channel via [incoming webhook](http://docs.mattermost.com/developer/webhooks-incoming.html)
+
+Just add the [HTTParty](https://github.com/jnunemaker/httparty) gem to your `Gemfile`:
+
+```ruby
+gem 'httparty'
+```
+
+To configure it, you **need** to set the `webhook_url` option.  
+You can also specify an other channel with `channel` option.
+
+```ruby
+Rails.application.config.middleware.use ExceptionNotification::Rack,
+  :email => {
+    :email_prefix => "[PREFIX] ",
+    :sender_address => %{"notifier" <notifier@example.com>},
+    :exception_recipients => %w{exceptions@example.com}
+  },
+  :mattermost => {
+    :webhook_url => 'http://your-mattermost.com/hooks/blablabla',
+    :channel => 'my-channel'
+  }
+```
+
+If you are using Github or Gitlab for issues tracking, you can specify `git_url` as follow to add a *Create issue* link in you notification.  
+By default this will use your Rails application name to match the git repository. If yours differ you can specify `app_name`.
+
+
+```ruby
+Rails.application.config.middleware.use ExceptionNotification::Rack,
+  :email => {
+    :email_prefix => "[PREFIX] ",
+    :sender_address => %{"notifier" <notifier@example.com>},
+    :exception_recipients => %w{exceptions@example.com}
+  },
+  :mattermost => {
+    :webhook_url => 'http://your-mattermost.com/hooks/blablabla',
+    :git_url => 'github.com/aschen'
+  }
+```
+
+You can also specify the bot name and avatar with `username` and `avatar` options.
+
+```ruby
+Rails.application.config.middleware.use ExceptionNotification::Rack,
+  :email => {
+    :email_prefix => "[PREFIX] ",
+    :sender_address => %{"notifier" <notifier@example.com>},
+    :exception_recipients => %w{exceptions@example.com}
+  },
+  :mattermost => {
+    :webhook_url => 'http://your-mattermost.com/hooks/blablabla',
+    :avatar => 'http://example.com/your-image.png',
+    :username => 'Fail bot'
+  }
+```
+
+Finally since the notifier use HTTParty, you can include all HTTParty options, like basic_auth for example.
+
+```ruby
+Rails.application.config.middleware.use ExceptionNotification::Rack,
+  :email => {
+    :email_prefix => "[PREFIX] ",
+    :sender_address => %{"notifier" <notifier@example.com>},
+    :exception_recipients => %w{exceptions@example.com}
+  },
+  :mattermost => {
+    :webhook_url => 'http://your-mattermost.com/hooks/blablabla',
+    :basic_auth => {
+      :username => 'clara',
+      :password => 'password'
+    }
+  }
+```
+
+#### Options
+
+##### webhook_url
+
+*String, required*
+
+The Incoming WebHook URL on mattermost.
+
+##### channel
+
+*String, optional*
+
+Message will appear in this channel. Defaults to the channel you set as such on mattermost.
+
+##### username
+
+*String, optional*
+
+Username of the bot. Defaults to "Incoming Webhook"
+
+##### avatar
+
+*String, optional*
+
+Avatar of the bot. Defaults to incoming webhook icon.
+
+##### git_url
+
+*String, optional*
+
+Url of your gitlab or github with your organisation name for issue creation link (Eg: `github.com/aschen`). Defaults to nil and don't add link to the notification.
+
+##### app_name
+
+*String, optional*
+
+Your application name used for issue creation link. Defaults to ``` Rails.application.class.parent_name.underscore```.
+
 
 ### WebHook notifier
 
@@ -756,7 +879,6 @@ Rails.application.config.middleware.use ExceptionNotification::Rack,
   }
 ```
 
-
 ## Ignore Exceptions
 
 You can choose to ignore certain exceptions, which will make ExceptionNotification avoid sending notifications for those specified. There are three ways of specifying which exceptions to ignore:
@@ -770,7 +892,7 @@ You can choose to ignore certain exceptions, which will make ExceptionNotificati
 
 ### :ignore_exceptions
 
-*Array of strings, default: %w{ActiveRecord::RecordNotFound AbstractController::ActionNotFound ActionController::RoutingError ActionController::UnknownFormat}*
+*Array of strings, default: %w{ActiveRecord::RecordNotFound Mongoid::Errors::DocumentNotFound AbstractController::ActionNotFound ActionController::RoutingError ActionController::UnknownFormat}*
 
 Ignore specified exception types. To achieve that, you should use the `:ignore_exceptions` option, like this:
 
@@ -897,21 +1019,13 @@ As above, make sure the gem is not listed solely under the `production` group, s
 
 ## Versions
 
-For v4.0.1, see this tag:
+For v4.2.1, see this tag:
 
-http://github.com/smartinez87/exception_notification/tree/v4.0.1
+http://github.com/smartinez87/exception_notification/tree/v4.2.1
 
-For v4.0.0, see this tag:
+For v4.2.0, see this tag:
 
-http://github.com/smartinez87/exception_notification/tree/v4.0.0
-
-For v3.0.1, see this tag:
-
-http://github.com/smartinez87/exception_notification/tree/v3.0.1
-
-For v3.0.0, see this tag:
-
-http://github.com/smartinez87/exception_notification/tree/v3.0.0
+http://github.com/smartinez87/exception_notification/tree/v4.2.0
 
 For previous releases, visit:
 

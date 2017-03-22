@@ -1,4 +1,5 @@
 require 'action_dispatch'
+require 'active_support/core_ext/time'
 
 module ExceptionNotifier
   class WebhookNotifier < BaseNotifier
@@ -39,8 +40,8 @@ module ExceptionNotifier
         options[:body][:session] = request.session
         options[:body][:environment] = request.filtered_env
       end
-      send_notice(exception, options, nil, @default_options) do |msg, opts|
-        HTTParty.send(http_method, url, opts)
+      send_notice(exception, options, nil, @default_options) do |_, _|
+        HTTParty.send(http_method, url, options)
       end
     end
   end

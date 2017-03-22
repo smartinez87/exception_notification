@@ -58,7 +58,7 @@ module ExceptionNotifier
     def compose_data_section
       return '' if @data.empty?
       out = sub_title('Data')
-      out << "`#{PP.pp(@data, '')}`\n\n"
+      out << "<pre>#{PP.pp(@data, '')}</pre>"
     end
 
     def compose_environment_section
@@ -91,24 +91,24 @@ module ExceptionNotifier
       out << "* HTTP Method: #{@request_hash[:http_method]}\n"
       out << "* IP address : #{@request_hash[:ip_address]}\n"
       out << "* Parameters : #{@request_hash[:parameters].inspect}\n"
-      out << "* Timestamp : #{@request_hash[:timestamp]}\n"
-      out << "* Server : #{Socket.gethostname}\n"
+      out << "* Timestamp  : #{@request_hash[:timestamp]}\n"
+      out << "* Server     : #{Socket.gethostname}\n"
       if defined?(Rails) && Rails.respond_to?(:root)
         out << "* Rails root : #{Rails.root}\n"
       end
-      out << "* Process : #{$$}</pre>"
+      out << "* Process    : #{$$}</pre>"
     end
 
     def compose_session_section
       out = sub_title('Session')
       id = if @request.ssl?
-             out << "[FILTERED]"
+             '[FILTERED]'
            else
              rack_session_id = (@request.env["rack.session.options"] and @request.env["rack.session.options"][:id])
              (@request.session['session_id'] || rack_session_id).inspect
            end
       out << format("<pre>* session id: %s\n", id)
-      out << "* data: #{PP.pp(@request.session.to_hash, '')}</pre>"
+      out << "* data     : #{PP.pp(@request.session.to_hash, '')}</pre>"
     end
 
     def compose_title
@@ -140,7 +140,7 @@ module ExceptionNotifier
     end
 
     def sub_title(text)
-      "## #{text}:\n\n"
+      "\n\n-------------------- #{text} --------------------\n\n"
     end
   end
 end

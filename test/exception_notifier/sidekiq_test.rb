@@ -12,6 +12,13 @@ class MockSidekiqServer
 end
 
 class SidekiqTest < ActiveSupport::TestCase
+  setup do
+    @_original_sidekiq_logger = Sidekiq::Logging.logger
+
+    # Silence sidekiq warning to stdout
+    Sidekiq::Logging.logger = nil
+  end
+
   test "should call notify_exception when sidekiq raises an error" do
     server = MockSidekiqServer.new
     message = Hash.new
@@ -23,5 +30,9 @@ class SidekiqTest < ActiveSupport::TestCase
     )
 
     server.handle_exception(exception, message)
+  end
+
+  teardown do
+    Sidekiq::Logging.logger = @_original_sidekiq_logger
   end
 end
