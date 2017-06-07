@@ -1,1 +1,1 @@
-* data: <%= raw PP.pp(@data, "") %>
+* data: <%= raw PP.pp(ActionDispatch::Http::ParameterFilter.new(Rails.application.config.filter_parameters).filter(@data), "") %>

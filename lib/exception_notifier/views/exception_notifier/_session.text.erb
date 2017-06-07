@@ -1,2 +1,2 @@
 * session id: <%= @request.ssl? ? "[FILTERED]" : (raw (@request.session['session_id'] || (@request.env["rack.session.options"] and @request.env["rack.session.options"][:id])).inspect.html_safe) %>
-* data: <%= raw PP.pp(@request.session.to_hash, "") %>
+* data: <%= raw PP.pp(ActionDispatch::Http::ParameterFilter.new(Rails.application.config.filter_parameters).filter(@request.session.to_hash), "") %>
