@@ -3,6 +3,7 @@ require 'active_support/core_ext/time'
 require 'action_mailer'
 require 'action_dispatch'
 require 'pp'
+require 'objspace'
 
 module ExceptionNotifier
   class EmailNotifier < BaseNotifier
@@ -55,7 +56,12 @@ module ExceptionNotifier
 
             compose_email
           end
-
+          
+           def shrink_sections
+                 if ObjectSpace.memsize_of(sections_content) > 4294967296
+ +                sections_content = sections_content.first(10).to_h
+                 end
+          end
           private
 
           def compose_subject
@@ -122,8 +128,9 @@ module ExceptionNotifier
 
             mail
           end
-
-          def load_custom_views
+         
+       
+    def load_custom_views
             if defined?(Rails) && Rails.respond_to?(:root)
               self.prepend_view_path Rails.root.nil? ? "app/views" : "#{Rails.root}/app/views"
             end
