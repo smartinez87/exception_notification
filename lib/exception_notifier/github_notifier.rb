@@ -18,9 +18,9 @@ module ExceptionNotifier
     def call(exception, options = {})
       @exception = exception
       @env = options[:env]
-      @kontroller = @env['action_controller.instance']
       @data = (@env && @env['exception_notifier.exception_data'] || {}).merge(options[:data] || {})
       unless @env.nil?
+        @kontroller = @env['action_controller.instance']
         @request = ActionDispatch::Request.new(@env)
         @request_hash = hash_from_request
         @session = @request.session
