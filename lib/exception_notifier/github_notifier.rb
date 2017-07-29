@@ -88,6 +88,7 @@ module ExceptionNotifier
       return '' if @request_hash.empty?
       out = sub_title('Request')
       out << "<pre>* URL        : #{@request_hash[:url]}\n"
+      out << "* Referer    : #{@request_hash[:referer]}\n"
       out << "* HTTP Method: #{@request_hash[:http_method]}\n"
       out << "* IP address : #{@request_hash[:ip_address]}\n"
       out << "* Parameters : #{@request_hash[:parameters].inspect}\n"
@@ -122,6 +123,7 @@ module ExceptionNotifier
 
     def hash_from_request
       {
+        referer: @request.referer,
         http_method: @request.method,
         ip_address: @request.remote_ip,
         parameters: @request.filtered_parameters,
