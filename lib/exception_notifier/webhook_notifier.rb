@@ -1,9 +1,11 @@
 require 'action_dispatch'
+require 'active_support/core_ext/time'
 
 module ExceptionNotifier
-  class WebhookNotifier
+  class WebhookNotifier < BaseNotifier
 
     def initialize(options)
+      super
       @default_options = options
     end
 
@@ -23,7 +25,7 @@ module ExceptionNotifier
       options[:body][:exception] = {:error_class => exception.class.to_s,
                                     :message => exception.message.inspect,
                                     :backtrace => exception.backtrace}
-      options[:body][:data] = ((env || {})['exception_notifier.exception_data'] || {}).merge(options[:data] || {})
+      options[:body][:data] = (env && env['exception_notifier.exception_data'] || {}).merge(options[:data] || {})
 
       unless env.nil?
         request = ActionDispatch::Request.new(env)
@@ -38,8 +40,9 @@ module ExceptionNotifier
         options[:body][:session] = request.session
         options[:body][:environment] = request.filtered_env
       end
-
-      HTTParty.send(http_method, url, options)
+      send_notice(exception, options, nil, @default_options) do |_, _|
+        HTTParty.send(http_method, url, options)
+      end
     end
   end
 end

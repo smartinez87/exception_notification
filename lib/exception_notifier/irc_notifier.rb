@@ -1,14 +1,23 @@
 module ExceptionNotifier
-  class IrcNotifier
+  class IrcNotifier < BaseNotifier
     def initialize(options)
+      super
       @config = OpenStruct.new
       parse_options(options)
     end
 
     def call(exception, options={})
+      errors_count = options[:accumulated_errors_count].to_i
+
       message = "'#{exception.message}'"
+      message.prepend("(#{errors_count} times)") if errors_count > 1
+
       message += " on '#{exception.backtrace.first}'" if exception.backtrace
-      send_message([*@config.prefix, *message].join(' ')) if active?
+      if active?
+        send_notice(exception, options, message) do |msg, _|
+          send_message([*@config.prefix, *msg].join(' '))
+        end
+      end
     end
 
     def send_message(message)

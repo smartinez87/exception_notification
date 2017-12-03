@@ -1,8 +1,11 @@
 require 'logger'
 require 'active_support/core_ext/string/inflections'
 require 'active_support/core_ext/module/attribute_accessors'
+require 'exception_notifier/base_notifier'
+require 'exception_notifier/modules/error_grouping'
 
 module ExceptionNotifier
+  include ErrorGrouping
 
   autoload :BacktraceCleaner, 'exception_notifier/modules/backtrace_cleaner'
 
@@ -13,6 +16,7 @@ module ExceptionNotifier
   autoload :WebhookNotifier, 'exception_notifier/webhook_notifier'
   autoload :IrcNotifier, 'exception_notifier/irc_notifier'
   autoload :SlackNotifier, 'exception_notifier/slack_notifier'
+  autoload :MattermostNotifier, 'exception_notifier/mattermost_notifier'
 
   class UndefinedNotifierError < StandardError; end
 
@@ -22,7 +26,10 @@ module ExceptionNotifier
 
   # Define a set of exceptions to be ignored, ie, dont send notifications when any of them are raised.
   mattr_accessor :ignored_exceptions
-  @@ignored_exceptions = %w{ActiveRecord::RecordNotFound AbstractController::ActionNotFound ActionController::RoutingError ActionController::UnknownFormat}
+  @@ignored_exceptions = %w{ActiveRecord::RecordNotFound Mongoid::Errors::DocumentNotFound AbstractController::ActionNotFound ActionController::RoutingError ActionController::UnknownFormat ActionController::UrlGenerationError}
+
+  mattr_accessor :testing_mode
+  @@testing_mode = false
 
   class << self
     # Store conditions that decide when exceptions must be ignored or not.
@@ -31,9 +38,18 @@ module ExceptionNotifier
     # Store notifiers that send notifications when exceptions are raised.
     @@notifiers = {}
 
+    def testing_mode!
+      self.testing_mode = true
+    end
+
     def notify_exception(exception, options={})
       return false if ignored_exception?(options[:ignore_exceptions], exception)
       return false if ignored?(exception, options)
+      if error_grouping
+        errors_count = group_error!(exception, options)
+        return false unless send_notification?(exception, errors_count)
+      end
+
       selected_notifiers = options.delete(:notifiers) || notifiers
       [*selected_notifiers].each do |notifier|
         fire_notification(notifier, exception, options.dup)
@@ -81,6 +97,8 @@ module ExceptionNotifier
     def ignored?(exception, options)
       @@ignores.any?{ |condition| condition.call(exception, options) }
     rescue Exception => e
+      raise e if @@testing_mode
+
       logger.warn "An error occurred when evaluating an ignore condition. #{e.class}: #{e.message}\n#{e.backtrace.join("\n")}"
       false
     end
@@ -93,6 +111,8 @@ module ExceptionNotifier
       notifier = registered_exception_notifier(notifier_name)
       notifier.call(exception, options)
     rescue Exception => e
+      raise e if @@testing_mode
+
       logger.warn "An error occurred when sending a notification using '#{notifier_name}' notifier. #{e.class}: #{e.message}\n#{e.backtrace.join("\n")}"
       false
     end

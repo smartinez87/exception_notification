@@ -5,8 +5,7 @@ class PostsControllerTest < ActionController::TestCase
     Time.stubs(:current).returns('Sat, 20 Apr 2013 20:58:55 UTC +00:00')
     @email_notifier = ExceptionNotifier.registered_exception_notifier(:email)
     begin
-      @post = posts(:one)
-      post :create, :post => @post.attributes
+      post :create, method: :post, params: { secret: "secret" }
     rescue => e
       @exception = e
       @mail = @email_notifier.create_email(@exception, {:env => request.env, :data => {:message => 'My Custom Message'}})
@@ -36,7 +35,7 @@ class PostsControllerTest < ActionController::TestCase
   test "mail subject should have the proper prefix" do
     assert_includes @mail.subject, "[Dummy ERROR]"
   end
-
+  
   test "mail subject should include descriptive error message" do
     assert_includes @mail.subject, "(NoMethodError) \"undefined method `nw'"
   end
@@ -71,23 +70,22 @@ class PostsControllerTest < ActionController::TestCase
 
   test "should not send notification if one of ignored exceptions" do
     begin
-      get :show, :id => @post.to_param + "10"
+      get :invalid
     rescue => e
       @ignored_exception = e
       unless ExceptionNotifier.ignored_exceptions.include?(@ignored_exception.class.name)
-        @ignored_mail = @email_notifier.create_email(@ignored_exception, {:env => request.env})
+        ignored_mail = @email_notifier.create_email(@ignored_exception, {:env => request.env})
       end
     end
 
-    assert_equal @ignored_exception.class.inspect, "ActiveRecord::RecordNotFound"
-    assert_nil @ignored_mail
+    assert_equal @ignored_exception.class.inspect, "ActionController::UrlGenerationError"
+    assert_nil ignored_mail
   end
 
   test "should filter session_id on secure requests" do
     request.env['HTTPS'] = 'on'
     begin
-      @post = posts(:one)
-      post :create, :post => @post.attributes
+      post :create, method: :post
     rescue => e
       @secured_mail = @email_notifier.create_email(e, {:env => request.env})
     end
@@ -99,8 +97,7 @@ class PostsControllerTest < ActionController::TestCase
   test "should ignore exception if from unwanted crawler" do
     request.env['HTTP_USER_AGENT'] = "Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)"
     begin
-      @post = posts(:one)
-      post :create, :post => @post.attributes
+      post :create, method: :post
     rescue => e
       @exception = e
       custom_env = request.env
@@ -108,17 +105,16 @@ class PostsControllerTest < ActionController::TestCase
       custom_env['exception_notifier.options'].merge!(:ignore_crawlers => %w(Googlebot))
       ignore_array = custom_env['exception_notifier.options'][:ignore_crawlers]
       unless ExceptionNotification::Rack.new(Dummy::Application, custom_env['exception_notifier.options']).send(:from_crawler, custom_env, ignore_array)
-        @ignored_mail = @email_notifier.create_email(@exception, {:env => custom_env})
+        ignored_mail = @email_notifier.create_email(@exception, {:env => custom_env})
       end
     end
 
-    assert_nil @ignored_mail
+    assert_nil ignored_mail
   end
 
   test "should send html email when selected html format" do
     begin
-      @post = posts(:one)
-      post :create, :post => @post.attributes
+      post :create, method: :post
     rescue => e
       @exception = e
       custom_env = request.env
@@ -136,8 +132,7 @@ class PostsControllerTestWithoutVerboseSubject < ActionController::TestCase
   setup do
     @email_notifier = ExceptionNotifier::EmailNotifier.new(:verbose_subject => false)
     begin
-      @post = posts(:one)
-      post :create, :post => @post.attributes
+      post :create, method: :post
     rescue => e
       @exception = e
       @mail = @email_notifier.create_email(@exception, {:env => request.env})
@@ -145,7 +140,28 @@ class PostsControllerTestWithoutVerboseSubject < ActionController::TestCase
   end
 
   test "should not include exception message in subject" do
-    assert_equal "[ERROR] # (NoMethodError)", @mail.subject
+    assert_includes @mail.subject, '[ERROR]'
+    assert_includes @mail.subject, '(NoMethodError)'
+    refute_includes @mail.subject, 'undefined method'
+  end
+end
+
+class PostsControllerTestWithoutControllerAndActionNames < ActionController::TestCase
+  tests PostsController
+  setup do
+    @email_notifier = ExceptionNotifier::EmailNotifier.new(:include_controller_and_action_names_in_subject => false)
+    begin
+      post :create, method: :post
+    rescue => e
+      @exception = e
+      @mail = @email_notifier.create_email(@exception, {:env => request.env})
+    end
+  end
+
+  test "should include controller and action names in subject" do
+    assert_includes @mail.subject, '[ERROR]'
+    assert_includes @mail.subject, '(NoMethodError)'
+    refute_includes @mail.subject, 'posts#create'
   end
 end
 
@@ -158,8 +174,7 @@ class PostsControllerTestWithSmtpSettings < ActionController::TestCase
     })
 
     begin
-      @post = posts(:one)
-      post :create, :post => @post.attributes
+      post :create, method: :post
     rescue => e
       @exception = e
       @mail = @email_notifier.create_email(@exception, {:env => request.env})
@@ -178,41 +193,12 @@ class PostsControllerTestWithSmtpSettings < ActionController::TestCase
   end
 end
 
-class PostsControllerTestBadRequestData < ActionController::TestCase
-  tests PostsController
-  setup do
-    @email_notifier = ExceptionNotifier.registered_exception_notifier(:email)
-    begin
-      # This might seem synthetic, but the point is that the data used by
-      # ExceptionNotification could be rendered "invalid" by e.g. a badly
-      # behaving middleware, and we want to test that ExceptionNotification
-      # still manages to send off an email in those cases.
-      #
-      # The trick here is to trigger an exception in the template used by
-      # ExceptionNotification. (The original test stuffed request.env with
-      # badly encoded strings, but that only works in Ruby 1.9+.)
-      request.send :instance_variable_set, :@env, {}
-
-      @post = posts(:one)
-      post :create, :post => @post.attributes
-    rescue => e
-      @exception = e
-      @mail = @email_notifier.create_email(@exception, {:env => request.env})
-    end
-  end
-
-  test "should include error message in body" do
-    assert_match /ERROR: Failed to generate exception summary/, @mail.encoded.to_s
-  end
-end
-
 class PostsControllerTestBackgroundNotification < ActionController::TestCase
   tests PostsController
   setup do
     @email_notifier = ExceptionNotifier.registered_exception_notifier(:email)
     begin
-      @post = posts(:one)
-      post :create, :post => @post.attributes
+      post :create, method: :post
     rescue => exception
       @mail = @email_notifier.create_email(exception)
     end
@@ -220,5 +206,32 @@ class PostsControllerTestBackgroundNotification < ActionController::TestCase
 
   test "mail should contain the specified section" do
     assert_includes @mail.encoded, "* New background section for testing"
+  end
+end
+
+class PostsControllerTestWithExceptionRecipientsAsProc < ActionController::TestCase
+  tests PostsController
+  setup do
+    exception_recipients = %w{first@example.com second@example.com}
+
+    @email_notifier = ExceptionNotifier::EmailNotifier.new(
+      exception_recipients: -> { [ exception_recipients.shift ] }
+    )
+
+    @action = proc do
+      begin
+        post :create, method: :post
+      rescue => e
+        @exception = e
+        @mail = @email_notifier.create_email(@exception, {:env => request.env})
+      end
+    end
+  end
+
+  test "should lazily evaluate exception_recipients" do
+    @action.call
+    assert_equal [ "first@example.com" ], @mail.to
+    @action.call
+    assert_equal [ "second@example.com" ], @mail.to
   end
 end

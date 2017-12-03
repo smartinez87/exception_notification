@@ -1,3 +1,51 @@
+== 4.2.2
+
+* enhancements
+  * Error groupiong (by @Martin91)
+  * Additional fields for Slack support (by @schurig)
+  * Enterprise HipChat support (by @seanhuber)
+
+== 4.2.1
+
+* enhancements
+  * Allow customizable backtrace for Slack (by @aried3r)
+  * Add `Mongoid::Errors::DocumentNotFound` to ignored_exceptions (by @nazarok)
+  * Improved text in Slack notifier (by @vojtad)
+
+* bug fixes
+  * Fix data being sent on webhook notifier
+
+== 4.2.0
+
+* enhancements
+  * update URL in gemspec (by @ktdreyer)
+  * Add `hostname` to Slack notifier (by @juanazam)
+  * Allow `exception_recipients` to be a proc (by @kellyjosephprice)
+  * Add Mattermost integration (by @Aschen)
+  * Rails 5 compatible
+
+* bug fixes
+  * Fix error when showing timestamp on non Rails apps
+  * Fix delivery failure when deliver_with specified (by @grzuy)
+
+== 4.1.4
+
+* bug fixes
+  * HTML-escape exception messages sent to hipchat (by @gburt)
+  * Send the correct options in send_notice (by @pcboy)
+
+== 4.1.3
+
+* enhancements
+  * Add a way to have a backtrace callback on notifiers (by @pcboy)
+
+* bug fixes
+  * Fix incompatible character encodings error (by @san650)
+
+== 4.1.2
+* enhancements
+  * Change format of Slack notifications (by @eldano)
+
 == 4.1.1
 
 * bug fixes

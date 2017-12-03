@@ -1,4 +1,4 @@
-<%= @exception.class.to_s =~ /^[aeiou]/i ? 'An' : 'A' %> <%= @exception.class %> occurred in background at <%= raw Time.current %> :
+<%= @exception.class.to_s =~ /^[aeiou]/i ? 'An' : 'A' %> <%= @exception.class %> occurred in background at <%= raw @timestamp %> :
 
   <%= @exception.message %>
   <%= @backtrace.first %>

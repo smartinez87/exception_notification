@@ -1,4 +1,5 @@
 require 'test_helper'
+require 'action_mailer'
 
 class EmailNotifierTest < ActiveSupport::TestCase
   setup do
@@ -11,6 +12,11 @@ class EmailNotifierTest < ActiveSupport::TestCase
       @mail = @email_notifier.create_email(@exception,
         :data => {:job => 'DivideWorkerJob', :payload => '1/0', :message => 'My Custom Message'})
     end
+  end
+
+  test "should call pre/post_callback if specified" do
+    assert_equal @email_notifier.options[:pre_callback_called], 1
+    assert_equal @email_notifier.options[:post_callback_called], 1
   end
 
   test "should have default sender address overridden" do
@@ -95,15 +101,7 @@ class EmailNotifierTest < ActiveSupport::TestCase
   end
 
   test "mail should have a descriptive subject" do
-    # On Rails < 4.1 the subject prefix has two spaces before the rest of the
-    # subject content.
-    if Gem::Version.new(ActionMailer::VERSION::STRING) < Gem::Version.new('4.1')
-      prefix = '[Dummy ERROR]  '
-    else
-      # On Rails 4.1 the subject prefix has a single space.
-      prefix = '[Dummy ERROR] '
-    end
-    assert_equal @mail.subject, prefix + '(ZeroDivisionError) "divided by 0"'
+    assert_match(/^\[Dummy ERROR\]\s+\(ZeroDivisionError\) "divided by 0"$/, @mail.subject)
   end
 
   test "mail should say exception was raised in background at show timestamp" do
@@ -122,7 +120,7 @@ class EmailNotifierTest < ActiveSupport::TestCase
   end
 
   test "mail should contain backtrace in body" do
-    assert @mail.encoded.include?("test/exception_notifier/email_notifier_test.rb:8"), "\n#{@mail.inspect}"
+    assert @mail.encoded.include?("test/exception_notifier/email_notifier_test.rb:9"), "\n#{@mail.inspect}"
   end
 
   test "mail should contain data in body" do
@@ -142,29 +140,96 @@ class EmailNotifierTest < ActiveSupport::TestCase
     rescue => e
       @ignored_exception = e
       unless ExceptionNotifier.ignored_exceptions.include?(@ignored_exception.class.name)
-        @ignored_mail = @email_notifier.create_email(@ignored_exception)
+        ignored_mail = @email_notifier.create_email(@ignored_exception)
       end
     end
 
     assert_equal @ignored_exception.class.inspect, "ActiveRecord::RecordNotFound"
-    assert_nil @ignored_mail
+    assert_nil ignored_mail
   end
 
-  if defined?(Rails) && ('4.2'...'5.0').cover?(Rails.version)
-    test "should be able to specify ActionMailer::MessageDelivery method" do
-      email_notifier = ExceptionNotifier::EmailNotifier.new(
-        :email_prefix => '[Dummy ERROR] ',
-        :sender_address => %{"Dummy Notifier" <dummynotifier@example.com>},
-        :exception_recipients => %w{dummyexceptions@example.com},
-        :deliver_with => :deliver_now
-      )
-      # In Rails 4.2, it gives deprecation warning like "`#deliver` is
-      # deprecated and will be removed in Rails 5." when "#deliver" is
-      # used. If methods like "#deliver_now" is used, it should not
-      # give any warnings.
-      assert_silent do
-        email_notifier.call(@exception)
-      end
+  test "should encode environment strings" do
+    email_notifier = ExceptionNotifier::EmailNotifier.new(
+      :sender_address => "<dummynotifier@example.com>",
+      :exception_recipients => %w{dummyexceptions@example.com},
+      :deliver_with => :deliver_now
+    )
+
+    mail = email_notifier.create_email(
+      @exception,
+      :env => {
+        "REQUEST_METHOD" => "GET",
+        "rack.input" => "",
+        "invalid_encoding" => "R\xC3\xA9sum\xC3\xA9".force_encoding(Encoding::ASCII),
+      },
+      :email_format => :text
+    )
+
+    assert_match(/invalid_encoding\s+: R__sum__/, mail.encoded)
+  end
+
+  test "should send email using ActionMailer" do
+    ActionMailer::Base.deliveries.clear
+
+    email_notifier = ExceptionNotifier::EmailNotifier.new(
+      :email_prefix => '[Dummy ERROR] ',
+      :sender_address => %{"Dummy Notifier" <dummynotifier@example.com>},
+      :exception_recipients => %w{dummyexceptions@example.com},
+      :delivery_method => :test
+    )
+
+    email_notifier.call(@exception)
+
+    assert_equal 1, ActionMailer::Base.deliveries.count
+  end
+
+  test "should be able to specify ActionMailer::MessageDelivery method" do
+    ActionMailer::Base.deliveries.clear
+
+    if ActionMailer.version < Gem::Version.new("4.2")
+      deliver_with = :deliver
+    else
+      deliver_with = :deliver_now
     end
+
+    email_notifier = ExceptionNotifier::EmailNotifier.new(
+      :email_prefix => '[Dummy ERROR] ',
+      :sender_address => %{"Dummy Notifier" <dummynotifier@example.com>},
+      :exception_recipients => %w{dummyexceptions@example.com},
+      :deliver_with => deliver_with
+    )
+
+    email_notifier.call(@exception)
+
+    assert_equal 1, ActionMailer::Base.deliveries.count
+  end
+
+  test "should lazily evaluate exception_recipients" do
+    exception_recipients = %w{first@example.com second@example.com}
+    email_notifier = ExceptionNotifier::EmailNotifier.new(
+      :email_prefix => '[Dummy ERROR] ',
+      :sender_address => %{"Dummy Notifier" <dummynotifier@example.com>},
+      :exception_recipients => -> { [ exception_recipients.shift ] },
+      :delivery_method => :test
+    )
+
+    mail = email_notifier.call(@exception)
+    assert_equal %w{first@example.com}, mail.to
+    mail = email_notifier.call(@exception)
+    assert_equal %w{second@example.com}, mail.to
+  end
+
+  test "should prepend accumulated_errors_count in email subject if accumulated_errors_count larger than 1" do
+    ActionMailer::Base.deliveries.clear
+
+    email_notifier = ExceptionNotifier::EmailNotifier.new(
+      :email_prefix => '[Dummy ERROR] ',
+      :sender_address => %{"Dummy Notifier" <dummynotifier@example.com>},
+      :exception_recipients => %w{dummyexceptions@example.com},
+      :delivery_method => :test
+    )
+
+    mail = email_notifier.call(@exception, { accumulated_errors_count: 3 })
+    assert mail.subject.start_with?("[Dummy ERROR] (3 times) (ZeroDivisionError)")
   end
 end

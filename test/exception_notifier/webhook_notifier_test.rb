@@ -14,7 +14,7 @@ class WebhookNotifierTest < ActiveSupport::TestCase
     assert_equal response[:body][:exception][:error_class], "ZeroDivisionError"
     assert_includes response[:body][:exception][:message], "divided by 0"
     assert_includes response[:body][:exception][:backtrace], "/exception_notification/test/webhook_notifier_test.rb:48"
-    
+
     assert response[:body][:request][:cookies].has_key?(:cookie_item1)
     assert_equal response[:body][:request][:url], "http://example.com/example"
     assert_equal response[:body][:request][:ip_address], "192.168.1.1"
@@ -23,6 +23,22 @@ class WebhookNotifierTest < ActiveSupport::TestCase
     assert response[:body][:request][:session].has_key?(:session_item1)
     assert response[:body][:request][:parameters].has_key?(:controller)
     assert response[:body][:data][:extra_data].has_key?(:data_item1)
+  end
+
+  test "should send webhook notification with correct params data" do
+    url = 'http://localhost:8000'
+    fake_exception.stubs(:backtrace).returns('the backtrace')
+    webhook = ExceptionNotifier::WebhookNotifier.new({:url => url})
+
+    HTTParty.expects(:send).with(:post, url, fake_params)
+
+    webhook.call(fake_exception)
+  end
+
+  test "should call pre/post_callback if specified" do
+    HTTParty.stubs(:send).returns(fake_response)
+    webhook = ExceptionNotifier::WebhookNotifier.new({:url => 'http://localhost:8000'})
+    webhook.call(fake_exception)
   end
 
   private
@@ -52,8 +68,24 @@ class WebhookNotifierTest < ActiveSupport::TestCase
     }
   end
 
+  def fake_params
+    {
+      :body => {
+        :server => Socket.gethostname,
+        :process => $$,
+        :rails_root => Rails.root,
+        :exception => {
+          :error_class => 'ZeroDivisionError',
+          :message => 'divided by 0'.inspect,
+          :backtrace => 'the backtrace'
+        },
+        :data => {}
+      }
+    }
+  end
+
   def fake_exception
-    exception = begin
+    @fake_exception ||= begin
       5/0
     rescue Exception => e
       e

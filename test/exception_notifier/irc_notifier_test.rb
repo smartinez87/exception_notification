@@ -16,6 +16,41 @@ class IrcNotifierTest < ActiveSupport::TestCase
     irc.call(fake_exception)
   end
 
+  test "should exclude errors count in message if :accumulated_errors_count nil" do
+    irc = ExceptionNotifier::IrcNotifier.new({})
+    irc.stubs(:active?).returns(true)
+
+    irc.expects(:send_message).with{ |message| message.include?("divided by 0") }.once
+    irc.call(fake_exception)
+  end
+
+  test "should include errors count in message if :accumulated_errors_count is 3" do
+    irc = ExceptionNotifier::IrcNotifier.new({})
+    irc.stubs(:active?).returns(true)
+
+    irc.expects(:send_message).with{ |message| message.include?("(3 times)'divided by 0'") }.once
+    irc.call(fake_exception, accumulated_errors_count: 3)
+  end
+
+  test "should call pre/post_callback if specified" do
+    pre_callback_called, post_callback_called = 0,0
+
+    options = {
+      :domain => 'irc.example.com',
+      :pre_callback => proc { |*| pre_callback_called += 1},
+      :post_callback => proc { |*| post_callback_called += 1}
+    }
+
+    CarrierPigeon.expects(:send).with(has_key(:uri)) do |v|
+      /divided by 0/.match(v[:message])
+    end
+
+    irc = ExceptionNotifier::IrcNotifier.new(options)
+    irc.call(fake_exception)
+    assert_equal(1, pre_callback_called)
+    assert_equal(1, post_callback_called)
+  end
+
   test "should send irc notification without backtrace info if properly configured" do
     options = {
       :domain => 'irc.example.com'
@@ -89,7 +124,7 @@ class IrcNotifierTest < ActiveSupport::TestCase
   private
 
   def fake_exception
-    exception = begin
+    begin
       5/0
     rescue Exception => e
       e

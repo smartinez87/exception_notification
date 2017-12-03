@@ -1,13 +1,16 @@
 require "active_support/core_ext/hash/reverse_merge"
+require 'active_support/core_ext/time'
 require 'action_mailer'
 require 'action_dispatch'
 require 'pp'
 
 module ExceptionNotifier
-  class EmailNotifier < Struct.new(:sender_address, :exception_recipients,
+  class EmailNotifier < BaseNotifier
+    attr_accessor(:sender_address, :exception_recipients,
+    :pre_callback, :post_callback,
     :email_prefix, :email_format, :sections, :background_sections,
-    :verbose_subject, :normalize_subject, :delivery_method, :mailer_settings,
-    :email_headers, :mailer_parent, :template_path, :deliver_with)
+    :verbose_subject, :normalize_subject, :include_controller_and_action_names_in_subject,
+    :delivery_method, :mailer_settings, :email_headers, :mailer_parent, :template_path, :deliver_with)
 
     module Mailer
       class MissingController
@@ -31,6 +34,7 @@ module ExceptionNotifier
             @kontroller = env['action_controller.instance'] || MissingController.new
             @request    = ActionDispatch::Request.new(env)
             @backtrace  = exception.backtrace ? clean_backtrace(exception) : []
+            @timestamp  = Time.current
             @sections   = @options[:sections]
             @data       = (env['exception_notifier.exception_data'] || {}).merge(options[:data] || {})
             @sections   = @sections + %w(data) unless @data.empty?
@@ -42,10 +46,12 @@ module ExceptionNotifier
             load_custom_views
 
             @exception = exception
-            @options   = options.reverse_merge(default_options)
+            @options   = options.reverse_merge(default_options).symbolize_keys
             @backtrace = exception.backtrace || []
+            @timestamp = Time.current
             @sections  = @options[:background_sections]
             @data      = options[:data] || {}
+            @env = @kontroller = nil
 
             compose_email
           end
@@ -54,7 +60,8 @@ module ExceptionNotifier
 
           def compose_subject
             subject = "#{@options[:email_prefix]}"
-            subject << "#{@kontroller.controller_name}##{@kontroller.action_name}" if @kontroller
+            subject << "(#{@options[:accumulated_errors_count]} times) " if @options[:accumulated_errors_count].to_i > 1
+            subject << "#{@kontroller.controller_name} #{@kontroller.action_name}" if @kontroller && @options[:include_controller_and_action_names_in_subject]
             subject << " (#{@exception.class})"
             subject << " #{@exception.message.inspect}" if @options[:verbose_subject]
             subject = EmailNotifier.normalize_digits(subject) if @options[:normalize_subject]
@@ -68,14 +75,24 @@ module ExceptionNotifier
           end
 
           helper_method :inspect_object
-
+          
+          def truncate(string, max)
+            string.length > max ? "#{string[0...max]}..." : string
+          end
+          
           def inspect_object(object)
             case object
               when Hash, Array
-                object.inspect
+                truncate(object.inspect, 300)
               else
-                object.to_s
+                  object.to_s 
             end
+          end
+
+          helper_method :safe_encode
+
+          def safe_encode(value)
+            value.encode("utf-8", invalid: :replace, undef: :replace, replace: "_")
           end
 
           def html_mail?
@@ -86,10 +103,11 @@ module ExceptionNotifier
             set_data_variables
             subject = compose_subject
             name = @env.nil? ? 'background_exception_notification' : 'exception_notification'
+            exception_recipients = maybe_call(@options[:exception_recipients])
 
             headers = {
               :delivery_method => @options[:delivery_method],
-              :to => @options[:exception_recipients],
+              :to => exception_recipients,
               :from => @options[:sender_address],
               :subject => subject,
               :template_name => name
@@ -110,25 +128,31 @@ module ExceptionNotifier
               self.prepend_view_path Rails.root.nil? ? "app/views" : "#{Rails.root}/app/views"
             end
           end
+
+          def maybe_call(maybe_proc)
+            maybe_proc.respond_to?(:call) ? maybe_proc.call : maybe_proc
+          end
         end
       end
     end
 
     def initialize(options)
+      super
       delivery_method = (options[:delivery_method] || :smtp)
       mailer_settings_key = "#{delivery_method}_settings".to_sym
       options[:mailer_settings] = options.delete(mailer_settings_key)
 
-      super(*options.reverse_merge(EmailNotifier.default_options).values_at(
-        :sender_address, :exception_recipients,
-        :email_prefix, :email_format, :sections, :background_sections,
-        :verbose_subject, :normalize_subject, :delivery_method, :mailer_settings,
-        :email_headers, :mailer_parent, :template_path, :deliver_with))
+      options.reverse_merge(EmailNotifier.default_options).select{|k,v|[
+        :sender_address, :exception_recipients, :pre_callback,
+        :post_callback, :email_prefix, :email_format,
+        :sections, :background_sections, :verbose_subject, :normalize_subject,
+        :include_controller_and_action_names_in_subject, :delivery_method, :mailer_settings,
+        :email_headers, :mailer_parent, :template_path, :deliver_with].include?(k)}.each{|k,v| send("#{k}=", v)}
     end
 
     def options
       @options ||= {}.tap do |opts|
-        each_pair { |k,v| opts[k] = v }
+        self.instance_variables.each { |var| opts[var[1..-1].to_sym] = self.instance_variable_get(var) }
       end
     end
 
@@ -140,16 +164,31 @@ module ExceptionNotifier
     end
 
     def call(exception, options={})
-      create_email(exception, options).send(deliver_with)
+      message = create_email(exception, options)
+
+      # FIXME: use `if Gem::Version.new(ActionMailer::VERSION::STRING) < Gem::Version.new('4.1')`
+      if deliver_with == :default
+        if message.respond_to?(:deliver_now)
+          message.deliver_now
+        else
+          message.deliver
+        end
+      else
+        message.send(deliver_with)
+      end
     end
 
     def create_email(exception, options={})
       env = options[:env]
       default_options = self.options
       if env.nil?
-        mailer.background_exception_notification(exception, options, default_options)
+        send_notice(exception, options, nil, default_options) do |_, default_opts|
+          mailer.background_exception_notification(exception, options, default_opts)
+        end
       else
-        mailer.exception_notification(env, exception, options, default_options)
+        send_notice(exception, options, nil, default_options) do |_, default_opts|
+          mailer.exception_notification(env, exception, options, default_opts)
+        end
       end
     end
 
@@ -163,12 +202,13 @@ module ExceptionNotifier
         :background_sections => %w(backtrace data),
         :verbose_subject => true,
         :normalize_subject => false,
+        :include_controller_and_action_names_in_subject => true,
         :delivery_method => nil,
         :mailer_settings => nil,
         :email_headers => {},
         :mailer_parent => 'ActionMailer::Base',
         :template_path => 'exception_notifier',
-        :deliver_with => :deliver_now
+        :deliver_with => :default
       }
     end
 

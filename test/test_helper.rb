@@ -15,3 +15,4 @@ require File.expand_path("../dummy/test/test_helper.rb", __FILE__)
 require "mocha/setup"
 
 Rails.backtrace_cleaner.remove_silencers!
+ExceptionNotifier.testing_mode!
