@@ -26,6 +26,7 @@ module ExceptionNotifier
           self.append_view_path "#{File.dirname(__FILE__)}/views"
 
           def exception_notification(env, exception, options={}, default_options={})
+            check_for_sane_options(options)
             load_custom_views
 
             @env        = env
@@ -43,6 +44,7 @@ module ExceptionNotifier
           end
 
           def background_exception_notification(exception, options={}, default_options={})
+            check_for_sane_options(options)
             load_custom_views
 
             @exception = exception
@@ -57,6 +59,17 @@ module ExceptionNotifier
           end
 
           private
+
+          def check_for_sane_options(options)
+            check_for_sane_data_option(options[:data]) if options[:data].present?
+          end
+
+          def check_for_sane_data_option(data_option)
+            reserved_keys = %w(env exception options kontroller request backtrace sections data)
+            data_option.keys.each do |key|
+              raise "Reserved key '#{key}' used in data option. Please do not use #{reserved_keys.join(",")} as keys." if reserved_keys.include? key.to_s
+            end
+          end
 
           def compose_subject
             subject = "#{@options[:email_prefix]}"
