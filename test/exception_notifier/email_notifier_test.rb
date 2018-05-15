@@ -219,6 +219,21 @@ class EmailNotifierTest < ActiveSupport::TestCase
     assert_equal %w{second@example.com}, mail.to
   end
 
+  test "should lazily evaluate email_prefix" do
+    email_prefixes = %w(first second)
+    email_notifier = ExceptionNotifier::EmailNotifier.new(
+      :email_prefix => -> { email_prefixes.shift },
+      :sender_address => %{"Dummy Notifier" <dummynotifier@example.com>},
+      :exception_recipients => "test@exampke.com",
+      :delivery_method => :test,
+    )
+
+    mail = email_notifier.call(@exception)
+    assert_equal %|first (ZeroDivisionError) "divided by 0"|, mail.subject
+    mail = email_notifier.call(@exception)
+    assert_equal %|second (ZeroDivisionError) "divided by 0"|, mail.subject
+  end
+
   test "should prepend accumulated_errors_count in email subject if accumulated_errors_count larger than 1" do
     ActionMailer::Base.deliveries.clear
 
