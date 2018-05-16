@@ -130,7 +130,8 @@ module ExceptionNotifier
           end
 
           def maybe_call(maybe_proc)
-            maybe_proc.respond_to?(:call) ? maybe_proc.call : maybe_proc
+            return maybe_proc unless maybe_proc.respond_to?(:call)
+            (maybe_proc.arity == 0) ? maybe_proc.call : maybe_proc.call(self)
           end
         end
       end
