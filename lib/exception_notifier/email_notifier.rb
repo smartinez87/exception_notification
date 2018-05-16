@@ -20,6 +20,8 @@ module ExceptionNotifier
 
       def self.extended(base)
         base.class_eval do
+          attr_reader :env, :exception, :request, :data
+
           self.send(:include, ExceptionNotifier::BacktraceCleaner)
 
           # Append application view path to the ExceptionNotifier lookup context.
