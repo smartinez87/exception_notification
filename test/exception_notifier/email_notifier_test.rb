@@ -232,4 +232,39 @@ class EmailNotifierTest < ActiveSupport::TestCase
     mail = email_notifier.call(@exception, { accumulated_errors_count: 3 })
     assert mail.subject.start_with?("[Dummy ERROR] (3 times) (ZeroDivisionError)")
   end
+
+  test "mail should include full chain of a nested exception" do
+    def raise_root_exception
+      raise "Root exception message"
+    end
+
+    def raise_middle_exception
+      begin
+        raise_root_exception
+      rescue StandardError
+        raise "Middle exception message"
+      end
+    end
+
+    def raise_top_exception
+      begin
+        raise_middle_exception
+      rescue StandardError
+        raise "Top exception message"
+      end
+    end
+
+    begin
+      raise_top_exception
+    rescue Exception => e
+      @mail = @email_notifier.create_email(e)
+    end
+
+    assert_includes @mail.encoded, "Top exception message"
+    assert_includes @mail.encoded, "`raise_top_exception'"
+    assert_includes @mail.encoded, "Middle exception message"
+    assert_includes @mail.encoded, "`raise_middle_exception'"
+    assert_includes @mail.encoded, "Root exception message"
+    assert_includes @mail.encoded, "`raise_root_exception'"
+  end
 end

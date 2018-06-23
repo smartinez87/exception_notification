@@ -38,6 +38,7 @@ module ExceptionNotifier
             @sections   = @options[:sections]
             @data       = (env['exception_notifier.exception_data'] || {}).merge(options[:data] || {})
             @sections   = @sections + %w(data) unless @data.empty?
+            @cause_exceptions = extract_cause_exceptions(exception)
 
             compose_email
           end
@@ -52,6 +53,7 @@ module ExceptionNotifier
             @sections  = @options[:background_sections]
             @data      = options[:data] || {}
             @env = @kontroller = nil
+            @cause_exceptions = extract_cause_exceptions(exception)
 
             compose_email
           end
@@ -131,6 +133,17 @@ module ExceptionNotifier
 
           def maybe_call(maybe_proc)
             maybe_proc.respond_to?(:call) ? maybe_proc.call : maybe_proc
+          end
+
+          def extract_cause_exceptions(exception)
+            return {} unless exception.respond_to? :cause
+
+            {}.tap do |result|
+              ce = exception
+              while (ce = ce.cause)
+                result[ce] = ce.backtrace ? clean_backtrace(ce) : []
+              end
+            end
           end
         end
       end

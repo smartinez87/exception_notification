@@ -1,3 +1,11 @@
 <pre style="font-size: 12px; padding: 10px; border: 1px solid #e1e1e8; background-color:#f5f5f5">
 <%= @backtrace.join("\n") %>
 </pre>
+<% @cause_exceptions.each_pair do |cause_exception, backtrace| %>
+
+Caused by:
+<%= cause_exception.message %>
+<pre style="font-size: 12px; padding: 10px; border: 1px solid #e1e1e8; background-color:#f5f5f5">
+  <%= raw backtrace.join("\n") %>
+</pre>
+<% end %>
