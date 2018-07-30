@@ -89,6 +89,7 @@ ExceptionNotification relies on notifiers to deliver notifications when errors o
 * [HipChat notifier](#hipchat-notifier)
 * [IRC notifier](#irc-notifier)
 * [Slack notifier](#slack-notifier)
+* [Rocket.Chat notifier](#rocketchat-notifier)
 * [Mattermost notifier](#mattermost-notifier)
 * [WebHook notifier](#webhook-notifier)
 
@@ -607,6 +608,14 @@ Contains additional payload for a message (e.g avatar, attachments, etc). See [s
 *Array of Hashes, optional*
 
 Contains additional fields that will be added to the attachement. See [Slack documentation](https://api.slack.com/docs/message-attachments).
+
+### Rocket.Chat notifier
+
+This notifier sends notifications to a rocker.chat channel using the rocket-chat-notifier gem.
+
+#### Usage
+
+Like slack notifier
 
 ## Mattermost notifier
 
