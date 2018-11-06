@@ -184,9 +184,9 @@ Who the message is destined for, can be a string of addresses, an array of addre
 
 ##### email_prefix
 
-*String, default: [ERROR]*
+*String/Proc, default: [ERROR]*
 
-The subject's prefix of the message.
+The subject's prefix of the message. It can be a proc that returns a string. The proc will be evaluated when the mail is sent.
 
 ##### sections
 

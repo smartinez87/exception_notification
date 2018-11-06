@@ -20,6 +20,8 @@ module ExceptionNotifier
 
       def self.extended(base)
         base.class_eval do
+          attr_reader :env, :exception, :request, :data
+
           self.send(:include, ExceptionNotifier::BacktraceCleaner)
 
           # Append application view path to the ExceptionNotifier lookup context.
@@ -59,7 +61,7 @@ module ExceptionNotifier
           private
 
           def compose_subject
-            subject = "#{@options[:email_prefix]}"
+            subject = "#{maybe_call(@options[:email_prefix])}"
             subject << "(#{@options[:accumulated_errors_count]} times)" if @options[:accumulated_errors_count].to_i > 1
             subject << "#{@kontroller.controller_name} #{@kontroller.action_name}" if @kontroller && @options[:include_controller_and_action_names_in_subject]
             subject << " (#{@exception.class})"
@@ -130,7 +132,8 @@ module ExceptionNotifier
           end
 
           def maybe_call(maybe_proc)
-            maybe_proc.respond_to?(:call) ? maybe_proc.call : maybe_proc
+            return maybe_proc unless maybe_proc.respond_to?(:call)
+            (maybe_proc.arity == 0) ? maybe_proc.call : maybe_proc.call(self)
           end
         end
       end
