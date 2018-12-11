@@ -164,7 +164,7 @@ gem 'dogapi'
 To use datadog notifier, you first need to create a `Dogapi::Client` with your datadog api and application keys, like this:
 
 ```ruby
-cilent = Dogapi::Client.new(api_key, application_key)
+client = Dogapi::Client.new(api_key, application_key)
 ```
 
 You then need to set the `client` option, like this:
