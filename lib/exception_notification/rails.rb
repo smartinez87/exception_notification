@@ -4,6 +4,7 @@ module ExceptionNotification
     config.exception_notification.logger = Rails.logger
     config.exception_notification.error_grouping_cache = Rails.cache
 
-    config.app_middleware.use ExceptionNotification::Rack
+    # config.app_middleware.use ExceptionNotification::Rack
+    config.app_middleware.insert_before ActiveRecord::ConnectionAdapters::ConnectionManagement, ExceptionNotification::Rack
   end
 end

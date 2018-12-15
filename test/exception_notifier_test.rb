@@ -78,6 +78,19 @@ class ExceptionNotifierTest < ActiveSupport::TestCase
     assert_equal ExceptionNotifier.notifiers, [:email]
   end
 
+  test "can catch database connection pool problems" do
+    begin
+      a = b = nil
+      a = ActiveRecord::Base.connection_pool.checkout
+      b = ActiveRecord::Base.connection_pool.checkout
+      ActiveRecord::Base.connection_pool.checkout
+
+    ensure
+      ActiveRecord::Base.connection_pool.checkin a rescue nil
+      ActiveRecord::Base.connection_pool.checkin b rescue nil
+    end
+  end
+
   test "should ignore exception if satisfies conditional ignore" do
     env = "production"
     ExceptionNotifier.ignore_if do |exception, options|
