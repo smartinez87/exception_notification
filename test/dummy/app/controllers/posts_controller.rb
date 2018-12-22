@@ -6,7 +6,7 @@ class PostsController < ApplicationController
 
     respond_to do |format|
       format.html # show.html.erb
-      format.xml  { render :xml => @post }
+      format.xml  { render xml: @post }
     end
   end
 
@@ -19,11 +19,11 @@ class PostsController < ApplicationController
 
     respond_to do |format|
       if @post.save
-        format.html { redirect_to(post_path(@post), :notice => 'Post was successfully created.') }
-        format.xml  { render :xml => @post, :status => :created, :location => @post }
+        format.html { redirect_to(post_path(@post), notice: 'Post was successfully created.') }
+        format.xml  { render xml: @post, status: :created, location: @post }
       else
-        format.html { render :action => "new" }
-        format.xml  { render :xml => @post.errors, :status => :unprocessable_entity }
+        format.html { render action: 'new' }
+        format.xml  { render xml: @post.errors, status: :unprocessable_entity }
       end
     end
   end

@@ -65,11 +65,11 @@ class ExceptionNotifierTest < ActiveSupport::TestCase
     assert_equal notifier1_calls, 1
     assert_equal notifier2_calls, 1
 
-    ExceptionNotifier.notify_exception(exception, {:notifiers => :notifier1})
+    ExceptionNotifier.notify_exception(exception, {notifiers: :notifier1})
     assert_equal notifier1_calls, 2
     assert_equal notifier2_calls, 1
 
-    ExceptionNotifier.notify_exception(exception, {:notifiers => :notifier2})
+    ExceptionNotifier.notify_exception(exception, {notifiers: :notifier2})
     assert_equal notifier1_calls, 2
     assert_equal notifier2_calls, 2
 
@@ -88,11 +88,11 @@ class ExceptionNotifierTest < ActiveSupport::TestCase
 
     exception = StandardError.new
 
-    ExceptionNotifier.notify_exception(exception, {:notifiers => :test})
+    ExceptionNotifier.notify_exception(exception, {notifiers: :test})
     assert_equal @notifier_calls, 1
 
     env = "development"
-    ExceptionNotifier.notify_exception(exception, {:notifiers => :test})
+    ExceptionNotifier.notify_exception(exception, {notifiers: :test})
     assert_equal @notifier_calls, 1
 
     ExceptionNotifier.clear_ignore_conditions!
@@ -103,10 +103,10 @@ class ExceptionNotifierTest < ActiveSupport::TestCase
 
     exception = StandardError.new
 
-    ExceptionNotifier.notify_exception(exception, {:notifiers => :test})
+    ExceptionNotifier.notify_exception(exception, {notifiers: :test})
     assert_equal @notifier_calls, 1
 
-    ExceptionNotifier.notify_exception(exception, {:notifiers => :test, :ignore_exceptions => 'StandardError' })
+    ExceptionNotifier.notify_exception(exception, {notifiers: :test, ignore_exceptions: 'StandardError' })
     assert_equal @notifier_calls, 1
   end
 
@@ -118,10 +118,10 @@ class ExceptionNotifierTest < ActiveSupport::TestCase
 
     exception = StandardErrorSubclass.new
 
-    ExceptionNotifier.notify_exception(exception, {:notifiers => :test})
+    ExceptionNotifier.notify_exception(exception, {notifiers: :test})
     assert_equal @notifier_calls, 1
 
-    ExceptionNotifier.notify_exception(exception, {:notifiers => :test, :ignore_exceptions => 'StandardError' })
+    ExceptionNotifier.notify_exception(exception, {notifiers: :test, ignore_exceptions: 'StandardError' })
     assert_equal @notifier_calls, 1
   end
 

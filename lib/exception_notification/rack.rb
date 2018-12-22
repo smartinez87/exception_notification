@@ -48,7 +48,7 @@ module ExceptionNotification
 
       response
     rescue Exception => exception
-      if ExceptionNotifier.notify_exception(exception, :env => env)
+      if ExceptionNotifier.notify_exception(exception, env: env)
         env['exception_notifier.delivered'] = true
       end
 

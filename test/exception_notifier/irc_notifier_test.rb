@@ -5,7 +5,7 @@ class IrcNotifierTest < ActiveSupport::TestCase
 
   test "should send irc notification if properly configured" do
     options = {
-      :domain => 'irc.example.com'
+      domain: 'irc.example.com'
     }
 
     CarrierPigeon.expects(:send).with(has_key(:uri)) do |v|
@@ -36,9 +36,9 @@ class IrcNotifierTest < ActiveSupport::TestCase
     pre_callback_called, post_callback_called = 0,0
 
     options = {
-      :domain => 'irc.example.com',
-      :pre_callback => proc { |*| pre_callback_called += 1},
-      :post_callback => proc { |*| post_callback_called += 1}
+      domain: 'irc.example.com',
+      pre_callback: proc { |*| pre_callback_called += 1 },
+      post_callback: proc { |*| post_callback_called += 1 }
     }
 
     CarrierPigeon.expects(:send).with(has_key(:uri)) do |v|
@@ -53,7 +53,7 @@ class IrcNotifierTest < ActiveSupport::TestCase
 
   test "should send irc notification without backtrace info if properly configured" do
     options = {
-      :domain => 'irc.example.com'
+      domain: 'irc.example.com'
     }
 
     CarrierPigeon.expects(:send).with(has_key(:uri)) do |v|
@@ -66,11 +66,11 @@ class IrcNotifierTest < ActiveSupport::TestCase
 
   test "should properly construct URI from constituent parts" do
     options = {
-      :nick => 'BadNewsBot',
-      :password => 'secret',
-      :domain => 'irc.example.com',
-      :port => 9999,
-      :channel => '#exceptions'
+      nick: 'BadNewsBot',
+      password: 'secret',
+      domain: 'irc.example.com',
+      port: 9999,
+      channel: '#exceptions'
     }
 
     CarrierPigeon.expects(:send).with(has_entry(uri: "irc://BadNewsBot:secret@irc.example.com:9999/#exceptions"))

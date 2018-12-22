@@ -11,7 +11,7 @@ class CampfireNotifierTest < ActiveSupport::TestCase
 
   test "should send campfire notification if properly configured" do
     ExceptionNotifier::CampfireNotifier.stubs(:new).returns(Object.new)
-    campfire = ExceptionNotifier::CampfireNotifier.new({:subdomain => 'test', :token => 'test_token', :room_name => 'test_room'})
+    campfire = ExceptionNotifier::CampfireNotifier.new({ subdomain: 'test', token: 'test_token', room_name: 'test_room' })
     campfire.stubs(:call).returns(fake_notification)
     notif = campfire.call(fake_exception)
 
@@ -24,7 +24,7 @@ class CampfireNotifierTest < ActiveSupport::TestCase
 
   test "should send campfire notification without backtrace info if properly configured" do
     ExceptionNotifier::CampfireNotifier.stubs(:new).returns(Object.new)
-    campfire = ExceptionNotifier::CampfireNotifier.new({:subdomain => 'test', :token => 'test_token', :room_name => 'test_room'})
+    campfire = ExceptionNotifier::CampfireNotifier.new({ subdomain: 'test', token: 'test_token', room_name: 'test_room' })
     campfire.stubs(:call).returns(fake_notification_without_backtrace)
     notif = campfire.call(fake_exception_without_backtrace)
 
@@ -35,8 +35,8 @@ class CampfireNotifierTest < ActiveSupport::TestCase
   end
 
   test "should not send campfire notification if badly configured" do
-    wrong_params = {:subdomain => 'test', :token => 'bad_token', :room_name => 'test_room'}
-    Tinder::Campfire.stubs(:new).with('test', {:token => 'bad_token'}).returns(nil)
+    wrong_params = { subdomain: 'test', token: 'bad_token', room_name: 'test_room' }
+    Tinder::Campfire.stubs(:new).with('test', { token: 'bad_token' }).returns(nil)
     campfire = ExceptionNotifier::CampfireNotifier.new(wrong_params)
 
     assert_nil campfire.room
@@ -44,7 +44,7 @@ class CampfireNotifierTest < ActiveSupport::TestCase
   end
 
   test "should not send campfire notification if config attr missing" do
-    wrong_params  = {:subdomain => 'test', :room_name => 'test_room'}
+    wrong_params  = { subdomain: 'test', room_name: 'test_room' }
     Tinder::Campfire.stubs(:new).with('test', {}).returns(nil)
     campfire = ExceptionNotifier::CampfireNotifier.new(wrong_params)
 
@@ -66,19 +66,19 @@ class CampfireNotifierTest < ActiveSupport::TestCase
     campfire.call(fake_exception, accumulated_errors_count: 3)
   end
 
-  test "should call pre/post_callback if specified" do 
+  test "should call pre/post_callback if specified" do
     pre_callback_called, post_callback_called = 0,0
     Tinder::Campfire.stubs(:new).returns(Object.new)
 
     campfire = ExceptionNotifier::CampfireNotifier.new(
       {
-        :subdomain => 'test',
-        :token => 'test_token',
-        :room_name => 'test_room',
-        :pre_callback => proc { |opts, notifier, backtrace, message, message_opts|
+        subdomain: 'test',
+        token: 'test_token',
+        room_name: 'test_room',
+        pre_callback: proc { |opts, notifier, backtrace, message, message_opts|
           pre_callback_called += 1
         },
-        :post_callback => proc { |opts, notifier, backtrace, message, message_opts|
+        post_callback: proc { |opts, notifier, backtrace, message, message_opts|
           post_callback_called += 1
         }
       }
@@ -93,9 +93,11 @@ class CampfireNotifierTest < ActiveSupport::TestCase
   private
 
   def fake_notification
-    {:message => {:type => 'PasteMessage',
-                  :body => "A new exception occurred: 'divided by 0' on '/Users/sebastian/exception_notification/test/campfire_test.rb:45:in `/'"
-                 }
+    {
+      message: {
+        type: 'PasteMessage',
+        body: "A new exception occurred: 'divided by 0' on '/Users/sebastian/exception_notification/test/campfire_test.rb:45:in `/'"
+      }
     }
   end
 
@@ -108,9 +110,11 @@ class CampfireNotifierTest < ActiveSupport::TestCase
   end
 
   def fake_notification_without_backtrace
-    {:message => {:type => 'PasteMessage',
-                  :body => "A new exception occurred: 'my custom error'"
-                 }
+    {
+      message: {
+        type: 'PasteMessage',
+        body: "A new exception occurred: 'my custom error'"
+      }
     }
   end
 

@@ -1,3 +1,3 @@
 Dummy::Application.routes.draw do
-  resources :posts, :only => [:create, :show]
+  resources :posts, only: [:create, :show]
 end

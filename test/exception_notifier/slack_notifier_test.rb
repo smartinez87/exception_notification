@@ -125,12 +125,12 @@ class SlackNotifierTest < ActiveSupport::TestCase
 
     notification_options = {
       env: {
-        'exception_notifier.exception_data' => {foo: 'bar', john: 'doe'}
+        'exception_notifier.exception_data' => { foo: 'bar', john: 'doe' }
       },
       data: {
         'user_id'           => 5,
         'key_to_be_ignored' => 'whatever',
-        'ignore_as_well'    => {what: 'ever'}
+        'ignore_as_well'    => { what: 'ever'}
       }
     }
 
@@ -147,10 +147,10 @@ class SlackNotifierTest < ActiveSupport::TestCase
       webhook_url: "http://slack.webhook.url",
       username: "test",
       custom_hook: "hook",
-      :pre_callback => proc { |opts, notifier, backtrace, message, message_opts|
+      pre_callback: proc { |opts, notifier, backtrace, message, message_opts|
         (message_opts[:attachments] = []) << { text: "#{backtrace.join("\n")}", color: 'danger' }
       },
-      :post_callback => proc { |opts, notifier, backtrace, message, message_opts|
+      post_callback: proc { |opts, notifier, backtrace, message, message_opts|
         post_callback_called = 1
       },
       additional_parameters: {
@@ -158,12 +158,12 @@ class SlackNotifierTest < ActiveSupport::TestCase
       }
     }
 
-    Slack::Notifier.any_instance.expects(:ping).with('',
-                                                     {:icon_url => 'icon',
-                                                      :attachments => [
-                                                        {:text => fake_backtrace.join("\n"),
-                                                         :color => 'danger'}
-                                                     ]})
+    Slack::Notifier.any_instance.expects(:ping).with('', {
+                                                    icon_url: 'icon',
+                                                    attachments: [{
+                                                      text: fake_backtrace.join("\n"),
+                                                      color: 'danger' }
+                                                    ]})
 
     slack_notifier = ExceptionNotifier::SlackNotifier.new(options)
     slack_notifier.call(@exception)

@@ -9,8 +9,10 @@ class EmailNotifierTest < ActiveSupport::TestCase
       1/0
     rescue => e
       @exception = e
-      @mail = @email_notifier.create_email(@exception,
-        :data => {:job => 'DivideWorkerJob', :payload => '1/0', :message => 'My Custom Message'})
+      @mail = @email_notifier.create_email(
+        @exception,
+        data: { job: 'DivideWorkerJob', payload: '1/0', message: 'My Custom Message'}
+      )
     end
   end
 
@@ -150,19 +152,19 @@ class EmailNotifierTest < ActiveSupport::TestCase
 
   test "should encode environment strings" do
     email_notifier = ExceptionNotifier::EmailNotifier.new(
-      :sender_address => "<dummynotifier@example.com>",
-      :exception_recipients => %w{dummyexceptions@example.com},
-      :deliver_with => :deliver_now
+      sender_address: "<dummynotifier@example.com>",
+      exception_recipients: %w{dummyexceptions@example.com},
+      deliver_with: :deliver_now
     )
 
     mail = email_notifier.create_email(
       @exception,
-      :env => {
+      env: {
         "REQUEST_METHOD" => "GET",
         "rack.input" => "",
         "invalid_encoding" => "R\xC3\xA9sum\xC3\xA9".force_encoding(Encoding::ASCII),
       },
-      :email_format => :text
+      email_format: :text
     )
 
     assert_match(/invalid_encoding\s+: R__sum__/, mail.encoded)
@@ -172,10 +174,10 @@ class EmailNotifierTest < ActiveSupport::TestCase
     ActionMailer::Base.deliveries.clear
 
     email_notifier = ExceptionNotifier::EmailNotifier.new(
-      :email_prefix => '[Dummy ERROR] ',
-      :sender_address => %{"Dummy Notifier" <dummynotifier@example.com>},
-      :exception_recipients => %w{dummyexceptions@example.com},
-      :delivery_method => :test
+      email_prefix: '[Dummy ERROR] ',
+      sender_address: %{"Dummy Notifier" <dummynotifier@example.com>},
+      exception_recipients: %w{dummyexceptions@example.com},
+      delivery_method: :test
     )
 
     email_notifier.call(@exception)
@@ -193,10 +195,10 @@ class EmailNotifierTest < ActiveSupport::TestCase
     end
 
     email_notifier = ExceptionNotifier::EmailNotifier.new(
-      :email_prefix => '[Dummy ERROR] ',
-      :sender_address => %{"Dummy Notifier" <dummynotifier@example.com>},
-      :exception_recipients => %w{dummyexceptions@example.com},
-      :deliver_with => deliver_with
+      email_prefix: '[Dummy ERROR] ',
+      sender_address: %{"Dummy Notifier" <dummynotifier@example.com>},
+      exception_recipients: %w{dummyexceptions@example.com},
+      deliver_with: deliver_with
     )
 
     email_notifier.call(@exception)
@@ -207,10 +209,10 @@ class EmailNotifierTest < ActiveSupport::TestCase
   test "should lazily evaluate exception_recipients" do
     exception_recipients = %w{first@example.com second@example.com}
     email_notifier = ExceptionNotifier::EmailNotifier.new(
-      :email_prefix => '[Dummy ERROR] ',
-      :sender_address => %{"Dummy Notifier" <dummynotifier@example.com>},
-      :exception_recipients => -> { [ exception_recipients.shift ] },
-      :delivery_method => :test
+      email_prefix: '[Dummy ERROR] ',
+      sender_address: %{"Dummy Notifier" <dummynotifier@example.com>},
+      exception_recipients: -> { [ exception_recipients.shift ] },
+      delivery_method: :test
     )
 
     mail = email_notifier.call(@exception)
@@ -223,10 +225,10 @@ class EmailNotifierTest < ActiveSupport::TestCase
     ActionMailer::Base.deliveries.clear
 
     email_notifier = ExceptionNotifier::EmailNotifier.new(
-      :email_prefix => '[Dummy ERROR] ',
-      :sender_address => %{"Dummy Notifier" <dummynotifier@example.com>},
-      :exception_recipients => %w{dummyexceptions@example.com},
-      :delivery_method => :test
+      email_prefix: '[Dummy ERROR] ',
+      sender_address: %{"Dummy Notifier" <dummynotifier@example.com>},
+      exception_recipients: %w{dummyexceptions@example.com},
+      delivery_method: :test
     )
 
     mail = email_notifier.call(@exception, { accumulated_errors_count: 3 })

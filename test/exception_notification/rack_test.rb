@@ -22,7 +22,7 @@ class RackTest < ActiveSupport::TestCase
 
   test "should notify on \"X-Cascade\" = \"pass\" if ignore_cascade_pass option is false" do
     ExceptionNotifier.expects(:notify_exception).once
-    ExceptionNotification::Rack.new(@pass_app, :ignore_cascade_pass => false).call({})
+    ExceptionNotification::Rack.new(@pass_app, ignore_cascade_pass: false).call({})
   end
 
   test "should assign error_grouping if error_grouping is specified" do
@@ -33,7 +33,7 @@ class RackTest < ActiveSupport::TestCase
 
   test "should assign notification_trigger if notification_trigger is specified" do
     assert_nil ExceptionNotifier.notification_trigger
-    ExceptionNotification::Rack.new(@normal_app, notification_trigger: lambda {|i| true}).call({})
+    ExceptionNotification::Rack.new(@normal_app, notification_trigger: lambda { |i| true }).call({})
     assert_respond_to ExceptionNotifier.notification_trigger, :call
   end
 

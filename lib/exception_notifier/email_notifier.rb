@@ -106,11 +106,11 @@ module ExceptionNotifier
             exception_recipients = maybe_call(@options[:exception_recipients])
 
             headers = {
-              :delivery_method => @options[:delivery_method],
-              :to => exception_recipients,
-              :from => @options[:sender_address],
-              :subject => subject,
-              :template_name => name
+              delivery_method: @options[:delivery_method],
+              to: exception_recipients,
+              from: @options[:sender_address],
+              subject: subject,
+              template_name: name
             }.merge(@options[:email_headers])
 
             mail = mail(headers) do |format|
@@ -194,21 +194,21 @@ module ExceptionNotifier
 
     def self.default_options
       {
-        :sender_address => %("Exception Notifier" <exception.notifier@example.com>),
-        :exception_recipients => [],
-        :email_prefix => "[ERROR] ",
-        :email_format => :text,
-        :sections => %w(request session environment backtrace),
-        :background_sections => %w(backtrace data),
-        :verbose_subject => true,
-        :normalize_subject => false,
-        :include_controller_and_action_names_in_subject => true,
-        :delivery_method => nil,
-        :mailer_settings => nil,
-        :email_headers => {},
-        :mailer_parent => 'ActionMailer::Base',
-        :template_path => 'exception_notifier',
-        :deliver_with => :default
+        sender_address: %("Exception Notifier" <exception.notifier@example.com>),
+        exception_recipients: [],
+        email_prefix: '[ERROR] ',
+        email_format: :text,
+        sections: %w(request session environment backtrace),
+        background_sections: %w(backtrace data),
+        verbose_subject: true,
+        normalize_subject: false,
+        include_controller_and_action_names_in_subject: true,
+        delivery_method: nil,
+        mailer_settings: nil,
+        email_headers: {},
+        mailer_parent: 'ActionMailer::Base',
+        template_path: 'exception_notifier',
+        deliver_with: :default
       }
     end
 

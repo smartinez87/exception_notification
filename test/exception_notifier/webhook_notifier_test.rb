@@ -5,7 +5,7 @@ class WebhookNotifierTest < ActiveSupport::TestCase
 
   test "should send webhook notification if properly configured" do
     ExceptionNotifier::WebhookNotifier.stubs(:new).returns(Object.new)
-    webhook = ExceptionNotifier::WebhookNotifier.new({:url => 'http://localhost:8000'})
+    webhook = ExceptionNotifier::WebhookNotifier.new({ url: 'http://localhost:8000' })
     webhook.stubs(:call).returns(fake_response)
     response = webhook.call(fake_exception)
 
@@ -28,7 +28,7 @@ class WebhookNotifierTest < ActiveSupport::TestCase
   test "should send webhook notification with correct params data" do
     url = 'http://localhost:8000'
     fake_exception.stubs(:backtrace).returns('the backtrace')
-    webhook = ExceptionNotifier::WebhookNotifier.new({:url => url})
+    webhook = ExceptionNotifier::WebhookNotifier.new({ url: url })
 
     HTTParty.expects(:send).with(:post, url, fake_params)
 
@@ -37,7 +37,7 @@ class WebhookNotifierTest < ActiveSupport::TestCase
 
   test "should call pre/post_callback if specified" do
     HTTParty.stubs(:send).returns(fake_response)
-    webhook = ExceptionNotifier::WebhookNotifier.new({:url => 'http://localhost:8000'})
+    webhook = ExceptionNotifier::WebhookNotifier.new({ url: 'http://localhost:8000' })
     webhook.call(fake_exception)
   end
 
@@ -45,24 +45,24 @@ class WebhookNotifierTest < ActiveSupport::TestCase
 
   def fake_response
     {
-      :status => 200,
-      :body => {
-        :exception => {
-          :error_class => 'ZeroDivisionError',
-          :message => 'divided by 0',
-          :backtrace => '/exception_notification/test/webhook_notifier_test.rb:48:in `/'
+      status: 200,
+      body: {
+        exception: {
+          error_class: 'ZeroDivisionError',
+          message: 'divided by 0',
+          backtrace: '/exception_notification/test/webhook_notifier_test.rb:48:in `/'
         },
-        :data => {
-          :extra_data => {:data_item1 => "datavalue1", :data_item2 => "datavalue2"}
+        data: {
+          extra_data: { data_item1: 'datavalue1', data_item2: 'datavalue2' }
         },
-        :request => {
-          :cookies => {:cookie_item1 => 'cookieitemvalue1', :cookie_item2 => 'cookieitemvalue2'},
-          :url => 'http://example.com/example',
-          :ip_address => '192.168.1.1',
-          :environment => {:env_item1 => "envitem1", :env_item2 => "envitem2"},
-          :controller => '#<ControllerName:0x007f9642a04d00>',
-          :session => {:session_item1 => "sessionitem1", :session_item2 => "sessionitem2"},
-          :parameters => {:action =>"index", :controller =>"projects"}
+        request: {
+          cookies: { cookie_item1: 'cookieitemvalue1', cookie_item2: 'cookieitemvalue2' },
+          url: 'http://example.com/example',
+          ip_address: '192.168.1.1',
+          environment: { env_item1: 'envitem1', env_item2: 'envitem2' },
+          controller: '#<ControllerName:0x007f9642a04d00>',
+          session: { session_item1: 'sessionitem1', session_item2: 'sessionitem2' },
+          parameters: { action:'index', controller:'projects' }
         }
       }
     }
@@ -70,16 +70,16 @@ class WebhookNotifierTest < ActiveSupport::TestCase
 
   def fake_params
     {
-      :body => {
-        :server => Socket.gethostname,
-        :process => $$,
-        :rails_root => Rails.root,
-        :exception => {
-          :error_class => 'ZeroDivisionError',
-          :message => 'divided by 0'.inspect,
-          :backtrace => 'the backtrace'
+      body: {
+        server: Socket.gethostname,
+        process: $$,
+        rails_root: Rails.root,
+        exception: {
+          error_class: 'ZeroDivisionError',
+          message: 'divided by 0'.inspect,
+          backtrace: 'the backtrace'
         },
-        :data => {}
+        data: {}
       }
     }
   end

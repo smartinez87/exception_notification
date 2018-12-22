@@ -52,7 +52,7 @@ module ExceptionNotifier
         else
           backtrace_based_key = "exception:#{Zlib.crc32("#{exception.class.name}\npath:#{exception.backtrace.try(:first)}")}"
 
-          if count = Rails.cache.read(backtrace_based_key)
+          if count = error_grouping_cache.read(backtrace_based_key)
             accumulated_errors_count = count + 1
             save_error_count(backtrace_based_key, accumulated_errors_count)
           else

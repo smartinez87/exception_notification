@@ -26,7 +26,7 @@ class SidekiqTest < ActiveSupport::TestCase
 
     ExceptionNotifier.expects(:notify_exception).with(
       exception,
-      :data => { :sidekiq => message }
+      data: { sidekiq: message }
     )
 
     server.handle_exception(exception, message)

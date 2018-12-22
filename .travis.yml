@@ -11,18 +11,22 @@ install:
   - "gem install bundler"
   - "bundle install --jobs=3 --retry=3"
   - "mkdir -p test/dummy/tmp/cache"
+  - "mkdir -p test/dummy/tmp/non_default_location"
 gemfile:
   - gemfiles/rails4_0.gemfile
   - gemfiles/rails4_1.gemfile
   - gemfiles/rails4_2.gemfile
   - gemfiles/rails5_0.gemfile
   - gemfiles/rails5_1.gemfile
+  - gemfiles/rails5_2.gemfile
 matrix:
   exclude:
     - rvm: 2.1.10
       gemfile: gemfiles/rails5_0.gemfile
     - rvm: 2.1.10
       gemfile: gemfiles/rails5_1.gemfile
+    - rvm: 2.1.10
+      gemfile: gemfiles/rails5_2.gemfile
     # rails <=4.1 segfaults with ruby 2.4+
     - rvm: 2.4.3
       gemfile: gemfiles/rails4_0.gemfile

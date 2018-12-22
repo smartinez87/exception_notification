@@ -2,10 +2,9 @@ require 'test_helper'
 require 'httparty'
 
 class MattermostNotifierTest < ActiveSupport::TestCase
-
   test "should send notification if properly configured" do
     options = {
-      :webhook_url => 'http://localhost:8000'
+      webhook_url: 'http://localhost:8000'
     }
     mattermost_notifier = ExceptionNotifier::MattermostNotifier.new
     mattermost_notifier.httparty = FakeHTTParty.new
@@ -25,8 +24,8 @@ class MattermostNotifierTest < ActiveSupport::TestCase
 
   test "should send notification with create issue link if specified" do
     options = {
-      :webhook_url => 'http://localhost:8000',
-      :git_url => 'github.com/aschen'
+      webhook_url: 'http://localhost:8000',
+      git_url: 'github.com/aschen'
     }
     mattermost_notifier = ExceptionNotifier::MattermostNotifier.new
     mattermost_notifier.httparty = FakeHTTParty.new
@@ -42,9 +41,9 @@ class MattermostNotifierTest < ActiveSupport::TestCase
 
   test 'should add username and icon_url params to the notification if specified' do
     options = {
-      :webhook_url => 'http://localhost:8000',
-      :username => "Test Bot",
-      :avatar => 'http://site.com/icon.png'
+      webhook_url: 'http://localhost:8000',
+      username: 'Test Bot',
+      avatar: 'http://site.com/icon.png'
     }
     mattermost_notifier = ExceptionNotifier::MattermostNotifier.new
     mattermost_notifier.httparty = FakeHTTParty.new
@@ -59,12 +58,12 @@ class MattermostNotifierTest < ActiveSupport::TestCase
 
   test 'should add other HTTParty options to params' do
     options = {
-      :webhook_url => 'http://localhost:8000',
-      :username => "Test Bot",
-      :avatar => 'http://site.com/icon.png',
-      :basic_auth => {
-        :username => 'clara',
-        :password => 'password'
+      webhook_url: 'http://localhost:8000',
+      username: 'Test Bot',
+      avatar: 'http://site.com/icon.png',
+      basic_auth: {
+        username: 'clara',
+        password: 'password'
       }
     }
     mattermost_notifier = ExceptionNotifier::MattermostNotifier.new
@@ -97,9 +96,7 @@ class MattermostNotifierTest < ActiveSupport::TestCase
 end
 
 class FakeHTTParty
-
   def post(url, options)
     return options
   end
-
 end

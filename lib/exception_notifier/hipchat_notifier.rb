@@ -11,7 +11,7 @@ module ExceptionNotifier
         api_token         = options.delete(:api_token)
         room_name         = options.delete(:room_name)
         opts              = {
-                              :api_version => options.delete(:api_version) || 'v1'
+                              api_version: options.delete(:api_version) || 'v1'
                             }
         opts[:server_url] = options.delete(:server_url) if options[:server_url]
         @from             = options.delete(:from) || 'Exception'

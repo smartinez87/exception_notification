@@ -8,7 +8,7 @@ class PostsControllerTest < ActionController::TestCase
       post :create, method: :post, params: { secret: "secret" }
     rescue => e
       @exception = e
-      @mail = @email_notifier.create_email(@exception, {:env => request.env, :data => {:message => 'My Custom Message'}})
+      @mail = @email_notifier.create_email(@exception, { env: request.env, data: { message: 'My Custom Message' }})
     end
   end
 
@@ -35,7 +35,7 @@ class PostsControllerTest < ActionController::TestCase
   test "mail subject should have the proper prefix" do
     assert_includes @mail.subject, "[Dummy ERROR]"
   end
-  
+
   test "mail subject should include descriptive error message" do
     assert_includes @mail.subject, "(NoMethodError) \"undefined method `nw'"
   end
@@ -74,7 +74,7 @@ class PostsControllerTest < ActionController::TestCase
     rescue => e
       @ignored_exception = e
       unless ExceptionNotifier.ignored_exceptions.include?(@ignored_exception.class.name)
-        ignored_mail = @email_notifier.create_email(@ignored_exception, {:env => request.env})
+        ignored_mail = @email_notifier.create_email(@ignored_exception, { env: request.env })
       end
     end
 
@@ -87,7 +87,7 @@ class PostsControllerTest < ActionController::TestCase
     begin
       post :create, method: :post
     rescue => e
-      @secured_mail = @email_notifier.create_email(e, {:env => request.env})
+      @secured_mail = @email_notifier.create_email(e, { env: request.env })
     end
 
     assert request.ssl?
@@ -102,10 +102,10 @@ class PostsControllerTest < ActionController::TestCase
       @exception = e
       custom_env = request.env
       custom_env['exception_notifier.options'] ||= {}
-      custom_env['exception_notifier.options'].merge!(:ignore_crawlers => %w(Googlebot))
+      custom_env['exception_notifier.options'].merge!(ignore_crawlers: %w(Googlebot))
       ignore_array = custom_env['exception_notifier.options'][:ignore_crawlers]
       unless ExceptionNotification::Rack.new(Dummy::Application, custom_env['exception_notifier.options']).send(:from_crawler, custom_env, ignore_array)
-        ignored_mail = @email_notifier.create_email(@exception, {:env => custom_env})
+        ignored_mail = @email_notifier.create_email(@exception, { env: custom_env })
       end
     end
 
@@ -119,8 +119,8 @@ class PostsControllerTest < ActionController::TestCase
       @exception = e
       custom_env = request.env
       custom_env['exception_notifier.options'] ||= {}
-      custom_env['exception_notifier.options'].merge!({:email_format => :html})
-      @mail = @email_notifier.create_email(@exception, {:env => custom_env})
+      custom_env['exception_notifier.options'].merge!({ email_format: :html })
+      @mail = @email_notifier.create_email(@exception, { env: custom_env })
     end
 
     assert_includes @mail.content_type, "multipart/alternative"
@@ -130,12 +130,12 @@ end
 class PostsControllerTestWithoutVerboseSubject < ActionController::TestCase
   tests PostsController
   setup do
-    @email_notifier = ExceptionNotifier::EmailNotifier.new(:verbose_subject => false)
+    @email_notifier = ExceptionNotifier::EmailNotifier.new(verbose_subject: false)
     begin
       post :create, method: :post
     rescue => e
       @exception = e
-      @mail = @email_notifier.create_email(@exception, {:env => request.env})
+      @mail = @email_notifier.create_email(@exception, { env: request.env })
     end
   end
 
@@ -149,12 +149,12 @@ end
 class PostsControllerTestWithoutControllerAndActionNames < ActionController::TestCase
   tests PostsController
   setup do
-    @email_notifier = ExceptionNotifier::EmailNotifier.new(:include_controller_and_action_names_in_subject => false)
+    @email_notifier = ExceptionNotifier::EmailNotifier.new(include_controller_and_action_names_in_subject: false)
     begin
       post :create, method: :post
     rescue => e
       @exception = e
-      @mail = @email_notifier.create_email(@exception, {:env => request.env})
+      @mail = @email_notifier.create_email(@exception, { env: request.env})
     end
   end
 
@@ -168,16 +168,18 @@ end
 class PostsControllerTestWithSmtpSettings < ActionController::TestCase
   tests PostsController
   setup do
-    @email_notifier = ExceptionNotifier::EmailNotifier.new(:smtp_settings => {
-      :user_name => "Dummy user_name",
-      :password => "Dummy password"
-    })
+    @email_notifier = ExceptionNotifier::EmailNotifier.new(
+      smtp_settings: {
+        user_name: 'Dummy user_name',
+        password: 'Dummy password'
+      }
+    )
 
     begin
       post :create, method: :post
     rescue => e
       @exception = e
-      @mail = @email_notifier.create_email(@exception, {:env => request.env})
+      @mail = @email_notifier.create_email(@exception, { env: request.env })
     end
   end
 
@@ -223,7 +225,7 @@ class PostsControllerTestWithExceptionRecipientsAsProc < ActionController::TestC
         post :create, method: :post
       rescue => e
         @exception = e
-        @mail = @email_notifier.create_email(@exception, {:env => request.env})
+        @mail = @email_notifier.create_email(@exception, { env: request.env })
       end
     end
   end

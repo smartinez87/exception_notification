@@ -38,5 +38,8 @@ module Dummy
 
     # Configure sensitive parameters which will be filtered from the log file.
     config.filter_parameters += [:password, :secret]
+
+    rails_version = Gem::Version.new(Rails.version)
+    config.active_record.sqlite3.represent_boolean_as_integer = true if rails_version >= Gem::Version.new("5.2.0")
   end
 end

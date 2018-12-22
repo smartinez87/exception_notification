@@ -5,7 +5,7 @@ class ErrorGroupTest < ActiveSupport::TestCase
   setup do
     module TestModule
       include ExceptionNotifier::ErrorGrouping
-      @@error_grouping_cache = ActiveSupport::Cache::FileStore.new("test/dummy/tmp/cache")
+      @@error_grouping_cache = ActiveSupport::Cache::FileStore.new("test/dummy/tmp/non_default_location")
     end
 
     @exception = RuntimeError.new("ERROR")

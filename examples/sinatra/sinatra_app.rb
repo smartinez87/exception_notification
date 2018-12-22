@@ -5,15 +5,18 @@ require 'exception_notification'
 
 class SinatraApp < Sinatra::Base
   use Rack::Config do |env|
-    env["action_dispatch.parameter_filter"] = [:password] # This is highly recommended.  It will prevent the ExceptionNotification email from including your users' passwords
+    env['action_dispatch.parameter_filter'] = [:password] # This is highly recommended.  It will prevent the ExceptionNotification email from including your users' passwords
   end
 
   use ExceptionNotification::Rack,
-    :email => {
-      :email_prefix => "[Example] ",
-      :sender_address => %{"notifier" <notifier@example.com>},
-      :exception_recipients => %w{exceptions@example.com},
-      :smtp_settings => { :address => "localhost", :port => 1025 }
+    email: {
+      email_prefix: '[Example] ',
+      sender_address: %{"notifier" <notifier@example.com>},
+      exception_recipients: %w{exceptions@example.com},
+      smtp_settings: {
+        address: 'localhost',
+        port: 1025
+      }
     }
 
   get '/' do
@@ -25,7 +28,7 @@ class SinatraApp < Sinatra::Base
     begin
       1/0
     rescue Exception => e
-      ExceptionNotifier.notify_exception(e, :data => {:msg => "Cannot divide by zero!"})
+      ExceptionNotifier.notify_exception(e, data: { msg: 'Cannot divide by zero!' })
     end
     'Check email at <a href="http://localhost:1080">mailcatcher</a>.'
   end
