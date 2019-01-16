@@ -1,1 +1,7 @@
 <%= raw @backtrace.join("\n") %>
+<% @cause_exceptions.each_pair do |cause_exception, backtrace| %>
+
+Caused by:
+<%= cause_exception.message %>
+<%= raw backtrace.join("\n") %>
+<% end %>
