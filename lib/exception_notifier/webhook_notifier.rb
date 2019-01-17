@@ -2,6 +2,7 @@
 
 require 'action_dispatch'
 require 'active_support/core_ext/time'
+require 'action_dispatch/http/request' # for filtered_env
 
 module ExceptionNotifier
   class WebhookNotifier < BaseNotifier
