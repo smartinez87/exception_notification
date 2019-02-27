@@ -127,8 +127,12 @@ module ExceptionNotifier
     end
 
     def create_and_register_notifier(name, options)
+      third_party_module = options[:third_party_module]
+      notifier_module = third_party_module ? third_party_module::ExceptionNotifier : ExceptionNotifier
+
       notifier_classname = "#{name}_notifier".camelize
-      notifier_class = ExceptionNotifier.const_get(notifier_classname)
+      notifier_class = notifier_module.const_get(notifier_classname)
+
       notifier = notifier_class.new(options)
       register_exception_notifier(name, notifier)
     rescue NameError => e

@@ -49,6 +49,22 @@ class ExceptionNotifierTest < ActiveSupport::TestCase
     assert_equal ExceptionNotifier.notifiers, [:email]
   end
 
+  test 'should allow register a third party notifier' do
+    third_party_notification_service = Object.const_set('ThirdPartyNotificationService', Module.new)
+    exception_notifier = third_party_notification_service.const_set('ExceptionNotifier', Module.new)
+    third_party_notifier = exception_notifier.const_set('ThirdPartyNotifier', Class.new)
+
+    third_party_notifier.class_eval do
+      def initialize(options); end
+
+      def call(exception, options); end
+    end
+
+    ExceptionNotifier.register_exception_notifier(:third_party, third_party_module: third_party_notification_service)
+
+    assert_equal ExceptionNotifier.notifiers.sort, %i[email third_party]
+  end
+
   test 'should allow select notifiers to send error to' do
     notifier1_calls = 0
     notifier1 = ->(_exception, _options) { notifier1_calls += 1 }
