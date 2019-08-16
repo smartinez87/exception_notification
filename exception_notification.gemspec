@@ -18,8 +18,8 @@ Gem::Specification.new do |s|
   s.test_files = `git ls-files -- test`.split("\n")
   s.require_path = 'lib'
 
-  s.add_dependency('actionmailer', '>= 4.0', '< 6')
-  s.add_dependency('activesupport', '>= 4.0', '< 6')
+  s.add_dependency('actionmailer', '>= 4.0', '< 7')
+  s.add_dependency('activesupport', '>= 4.0', '< 7')
 
   s.add_development_dependency 'appraisal', '~> 2.2.0'
   s.add_development_dependency 'aws-sdk-sns', '~> 1'
@@ -30,7 +30,7 @@ Gem::Specification.new do |s|
   s.add_development_dependency 'httparty', '~> 0.10.2'
   s.add_development_dependency 'mock_redis', '~> 0.18.0'
   s.add_development_dependency 'mocha', '>= 0.13.0'
-  s.add_development_dependency 'rails', '>= 4.0', '< 6'
+  s.add_development_dependency 'rails', '>= 4.0', '< 7'
   s.add_development_dependency 'resque', '~> 1.8.0'
   s.add_development_dependency 'rubocop', '0.50.0'
   # Sidekiq 3.2.2 does not support Ruby 1.9.

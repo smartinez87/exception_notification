@@ -26,6 +26,7 @@ gemfile:
   - gemfiles/rails5_0.gemfile
   - gemfiles/rails5_1.gemfile
   - gemfiles/rails5_2.gemfile
+  - gemfiles/rails6_0.gemfile
 matrix:
   exclude:
     - rvm: 2.1.10
@@ -34,11 +35,19 @@ matrix:
       gemfile: gemfiles/rails5_1.gemfile
     - rvm: 2.1.10
       gemfile: gemfiles/rails5_2.gemfile
+    - rvm: 2.1.10
+      gemfile: gemfiles/rails6_0.gemfile
     # rails <=4.1 segfaults with ruby 2.4+
+    - rvm: 2.2.9
+      gemfile: gemfiles/rails6_0.gemfile
+    - rvm: 2.3.6
+      gemfile: gemfiles/rails6_0.gemfile
     - rvm: 2.4.3
       gemfile: gemfiles/rails4_0.gemfile
     - rvm: 2.4.3
       gemfile: gemfiles/rails4_1.gemfile
+    - rvm: 2.4.3
+      gemfile: gemfiles/rails6_0.gemfile
     - rvm: 2.5.0
       gemfile: gemfiles/rails4_0.gemfile
     - rvm: 2.5.0
