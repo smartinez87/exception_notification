@@ -6,14 +6,29 @@
 <%
     sections = @sections.map do |section|
       begin
-        summary = render(section).strip
+        summary = render(section)
+        if summary.respond_to? :body
+          summary = summary.body
+        end
+        summary.strip!
+
         unless summary.blank?
-          title = render("title", title: section).strip
+          title = render("title", title: section)
+          if title.respond_to? :body
+            title = title.body
+          end
+          title.strip!
+
           "#{title}\n\n#{summary.gsub(/^/, "  ")}\n\n"
         end
 
       rescue Exception => e
-        title = render("title", title: section).strip
+        title = render("title", title: section)
+        if title.respond_to? :body
+          title = title.body
+        end
+        title.strip!
+
         summary = ["ERROR: Failed to generate exception summary:", [e.class.to_s, e.message].join(": "), e.backtrace && e.backtrace.join("\n")].compact.join("\n\n")
 
         [title, summary.gsub(/^/, "  "), nil].join("\n\n")
