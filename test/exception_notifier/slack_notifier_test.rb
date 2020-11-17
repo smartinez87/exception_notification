@@ -76,6 +76,18 @@ class SlackNotifierTest < ActiveSupport::TestCase
     slack_notifier.call(@exception)
   end
 
+  test 'should send the notification withouth cleaned backtrace lines if option is false' do
+    options = {
+      webhook_url: 'http://slack.webhook.url',
+      clean_backtrace: false
+    }
+
+    Slack::Notifier.any_instance.expects(:ping).with('', fake_notification(@exception, {}, nil, 6, [], false))
+
+    slack_notifier = ExceptionNotifier::SlackNotifier.new(options)
+    slack_notifier.call(@exception)
+  end
+
   test 'should send the notification with additional fields' do
     field = { title: 'Branch', value: 'master', short: true }
     options = {
@@ -198,7 +210,8 @@ class SlackNotifierTest < ActiveSupport::TestCase
   end
 
   def fake_notification(exception = @exception, notification_options = {},
-                        data_string = nil, expected_backtrace_lines = 10, additional_fields = [])
+                        data_string = nil, expected_backtrace_lines = 10,
+                        additional_fields = [], clean_backtrace = true)
 
     exception_name = "*#{exception.class.to_s =~ /^[aeiou]/i ? 'An' : 'A'}* `#{exception.class}`"
     if notification_options[:env].nil?
@@ -218,7 +231,8 @@ class SlackNotifierTest < ActiveSupport::TestCase
     fields = [{ title: 'Exception', value: exception.message }]
     fields.push(title: 'Hostname', value: 'example.com')
     if exception.backtrace
-      formatted_backtrace = "```#{fake_cleaned_backtrace.first(expected_backtrace_lines).join("\n")}```"
+      backtrace = clean_backtrace ? fake_cleaned_backtrace : fake_backtrace
+      formatted_backtrace = "```#{backtrace.first(expected_backtrace_lines).join("\n")}```"
       fields.push(title: 'Backtrace', value: formatted_backtrace)
     end
     fields.push(title: 'Data', value: "```#{data_string}```") if data_string

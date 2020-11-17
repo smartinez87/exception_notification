@@ -11,6 +11,7 @@ module ExceptionNotifier
       begin
         @ignore_data_if = options[:ignore_data_if]
         @backtrace_lines = options.fetch(:backtrace_lines, 10)
+        @clean_backtrace = options.delete(:clean_backtrace) { true }
         @additional_fields = options[:additional_fields]
 
         webhook_url = options.fetch(:webhook_url)
@@ -54,7 +55,9 @@ module ExceptionNotifier
 
     def attchs(exception, clean_message, options)
       text, data = information_from_options(exception.class, options)
-      backtrace = clean_backtrace(exception) if exception.backtrace
+      backtrace = if exception.backtrace
+        @clean_backtrace ? clean_backtrace(exception) : exception.backtrace
+      end
       fields = fields(clean_message, backtrace, data)
 
       [color: @color, text: text, fields: fields, mrkdwn_in: %w[text fields]]
