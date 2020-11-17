@@ -76,7 +76,7 @@ class SlackNotifierTest < ActiveSupport::TestCase
     slack_notifier.call(@exception)
   end
 
-  test 'should send the notification withouth cleaned backtrace lines if option is false' do
+  test 'should send the notification without cleaned backtrace lines if option is false' do
     options = {
       webhook_url: 'http://slack.webhook.url',
       clean_backtrace: false
