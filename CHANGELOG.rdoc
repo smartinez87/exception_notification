@@ -1,3 +1,6 @@
+* enhancements
+  * Added `clean_backtrace` option to SlackNotifier (defaults to true).
+
 == 4.4.3
 
 * big fixes
