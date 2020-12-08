@@ -40,24 +40,6 @@ class SnsNotifierTest < ActiveSupport::TestCase
     assert_equal "You must provide 'region' option", error.message
   end
 
-  test 'should raise an exception on publish if access_key_id is not received' do
-    @options[:access_key_id] = nil
-    error = assert_raises ArgumentError do
-      ExceptionNotifier::SnsNotifier.new(@options)
-    end
-
-    assert_equal "You must provide 'access_key_id' option", error.message
-  end
-
-  test 'should raise an exception on publish if secret_access_key is not received' do
-    @options[:secret_access_key] = nil
-    error = assert_raises ArgumentError do
-      ExceptionNotifier::SnsNotifier.new(@options)
-    end
-
-    assert_equal "You must provide 'secret_access_key' option", error.message
-  end
-
   # call
 
   test 'should send a sns notification in background' do
