@@ -66,6 +66,7 @@ class SnsNotifierTest < ActiveSupport::TestCase
       message: "3 MyException occured in background\n" \
              "Exception: undefined method 'method=' for Empty\n" \
              "Hostname: example.com\n" \
+             "Data: {}\n" \
              "Backtrace:\n#{fake_backtrace.join("\n")}\n",
       subject: '[App Exception] - 3 MyException occurred'
     )
@@ -85,6 +86,7 @@ class SnsNotifierTest < ActiveSupport::TestCase
              "was processed by examples#index\n" \
              "Exception: undefined method 'method=' for Empty\n" \
              "Hostname: example.com\n" \
+             "Data: {}\n" \
              "Backtrace:\n#{fake_backtrace.join("\n")}\n",
       subject: '[App Exception] - A MyException occurred'
     )
@@ -96,6 +98,60 @@ class SnsNotifierTest < ActiveSupport::TestCase
                         'REQUEST_URI' => '/examples',
                         'action_controller.instance' => controller
                       })
+  end
+
+  test 'should put data from env["exception_notifier.exception_data"] into text' do
+    controller = mock('controller')
+    controller.stubs(:action_name).returns('index')
+    controller.stubs(:controller_name).returns('examples')
+
+    Aws::SNS::Client.any_instance.expects(:publish).with(
+      topic_arn: 'topicARN',
+      message: 'A MyException occurred while GET </examples> ' \
+             "was processed by examples#index\n" \
+             "Exception: undefined method 'method=' for Empty\n" \
+             "Hostname: example.com\n" \
+             "Data: {:current_user=>12}\n" \
+             "Backtrace:\n#{fake_backtrace.join("\n")}\n",
+      subject: '[App Exception] - A MyException occurred'
+    )
+
+    sns_notifier = ExceptionNotifier::SnsNotifier.new(@options)
+    sns_notifier.call(@exception,
+                      env: {
+                        'REQUEST_METHOD' => 'GET',
+                        'REQUEST_URI' => '/examples',
+                        'action_controller.instance' => controller,
+                        'exception_notifier.exception_data' => {current_user: 12}
+                      })
+  end
+  test 'should put optional data into text' do
+    controller = mock('controller')
+    controller.stubs(:action_name).returns('index')
+    controller.stubs(:controller_name).returns('examples')
+
+    Aws::SNS::Client.any_instance.expects(:publish).with(
+      topic_arn: 'topicARN',
+      message: 'A MyException occurred while GET </examples> ' \
+             "was processed by examples#index\n" \
+             "Exception: undefined method 'method=' for Empty\n" \
+             "Hostname: example.com\n" \
+             "Data: {:current_user=>12}\n" \
+             "Backtrace:\n#{fake_backtrace.join("\n")}\n",
+      subject: '[App Exception] - A MyException occurred'
+    )
+
+    sns_notifier = ExceptionNotifier::SnsNotifier.new(@options)
+    sns_notifier.call(@exception,
+                      env: {
+                        'REQUEST_METHOD' => 'GET',
+                        'REQUEST_URI' => '/examples',
+                        'action_controller.instance' => controller,
+                      },
+                      data: {
+                        current_user: 12
+                      }
+                     )
   end
 
   private

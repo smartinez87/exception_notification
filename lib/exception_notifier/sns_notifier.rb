@@ -45,10 +45,12 @@ module ExceptionNotifier
 
       if options[:env].nil?
         text = "#{exception_name} occured in background\n"
+        data = options[:data] || {}
       else
         env = options[:env]
 
         kontroller = env['action_controller.instance']
+        data = (env['exception_notifier.exception_data'] || {}).merge(options[:data] || {})
         request = "#{env['REQUEST_METHOD']} <#{env['REQUEST_URI']}>"
 
         text = "#{exception_name} occurred while #{request}"
@@ -57,6 +59,7 @@ module ExceptionNotifier
 
       text += "Exception: #{exception.message}\n"
       text += "Hostname: #{Socket.gethostname}\n"
+      text += "Data: #{data}\n"
 
       return unless exception.backtrace
 

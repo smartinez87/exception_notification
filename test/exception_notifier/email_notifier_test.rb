@@ -248,7 +248,7 @@ class EmailNotifierWithEnvTest < ActiveSupport::TestCase
   test 'sends mail with correct content' do
     assert_equal %("Dummy Notifier" <dummynotifier@example.com>), @mail[:from].value
     assert_equal %w[dummyexceptions@example.com], @mail.to
-    assert_equal '[Dummy ERROR] home index (ZeroDivisionError) "divided by 0"', @mail.subject
+    assert_equal '[Dummy ERROR] home#index (ZeroDivisionError) "divided by 0"', @mail.subject
     assert_equal 'foobar', @mail['X-Custom-Header'].value
     assert_equal 'text/plain; charset=UTF-8', @mail.content_type
     assert_equal [], @mail.attachments
