@@ -141,6 +141,12 @@ Message will appear in this channel. Defaults to the channel you set as such on 
 
 Username of the bot. Defaults to the name you set as such on slack
 
+##### clean_backtrace
+
+*Boolean, optional*
+
+If enabled will clean the exception backtrace with Rails.backtrace_cleaner. Defaults to true.
+
 ##### custom_hook
 
 *String, optional*
