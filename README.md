@@ -284,6 +284,23 @@ This command generates an initialize file (`config/initializers/exception_notifi
 
 Make sure the gem is not listed solely under the `production` group, since this initializer will be loaded regardless of environment.
 
+#### Filtering params 
+
+ExceptionNotification sends a notification containing the parameters of the request. These parameters could contain sensitive and secret information that you don't want to get logged or sent out as an email outside of your system. Example is the secret_key_base.
+
+To filter these parameters you can use the 
+config/initializers/filter_parameter_logging.rb. An example that filters some of the parameters in a Rails 6 application would be: 
+
+```
+# config/initializers/filter_parameter_logging.rb
+# Configure sensitive parameters which will be filtered from the log file.
+Rails.application.config.filter_parameters += [
+  :passw, :secret, :token, :_key, :crypt, :salt, :certificate, :otp, :ssn
+]
+```
+
+You can read more about filter_parameters at https://guides.rubyonrails.org/configuring.html#rails-general-configuration 
+
 ### Resque/Sidekiq
 
 Instead of manually calling background notifications foreach job/worker, you can configure ExceptionNotification to do this automatically. For this, run:
