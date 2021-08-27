@@ -5,10 +5,6 @@
 [![Coverage Status](https://coveralls.io/repos/github/smartinez87/exception_notification/badge.svg?branch=master)](https://coveralls.io/github/smartinez87/exception_notification?branch=master)
 [![Maintainability](https://api.codeclimate.com/v1/badges/78a9a12be00a6d305136/maintainability)](https://codeclimate.com/github/smartinez87/exception_notification/maintainability)
 
-**THIS README IS FOR THE MASTER BRANCH AND REFLECTS THE WORK CURRENTLY EXISTING ON THE MASTER BRANCH. IF YOU ARE WISHING TO USE A NON-MASTER BRANCH OF EXCEPTION NOTIFICATION, PLEASE CONSULT THAT BRANCH'S README AND NOT THIS ONE.**
-
----
-
 The Exception Notification gem provides a set of [notifiers](#notifiers) for sending notifications when errors occur in a Rack/Rails application. The built-in notifiers can deliver notifications by [email](docs/notifiers/email.md), [Campfire](docs/notifiers/campfire.md), [HipChat](docs/notifiers/hipchat.md), [Slack](docs/notifiers/slack.md), [Mattermost](docs/notifiers/mattermost.md), [Teams](docs/notifiers/teams.md), [IRC](docs/notifiers/irc.md), [Amazon SNS](docs/notifiers/sns.md), [Google Chat](docs/notifiers/google_chat.md), [Datadog](docs/notifiers/datadog.md) or via custom [WebHooks](docs/notifiers/webhook.md).
 
 There's a great [Railscast about Exception Notification](http://railscasts.com/episodes/104-exception-notifications-revised) you can see that may help you getting started.
