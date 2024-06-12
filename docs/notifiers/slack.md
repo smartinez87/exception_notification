@@ -21,7 +21,6 @@ Rails.application.config.middleware.use ExceptionNotification::Rack,
                                         },
                                         slack: {
                                           webhook_url: '[Your webhook url]',
-                                          channel: '#exceptions',
                                           additional_parameters: {
                                             icon_url: 'http://image.jpg',
                                             mrkdwn: true
@@ -128,12 +127,6 @@ ExceptionNotifier.notify_exception(
 *String, required*
 
 The Incoming WebHook URL on slack.
-
-##### channel
-
-*String, optional*
-
-Message will appear in this channel. Defaults to the channel you set as such on slack.
 
 ##### username
 
