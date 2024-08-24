@@ -239,7 +239,7 @@ Rails.application.config.middleware.use ExceptionNotification::Rack,
                                         ignore_notifier_if: {
                                           email: ->(env, exception) { !Rails.env.production? },
                                           slack: ->(env, exception) { exception.message =~ /^Couldn't find Page with ID=/ }
-                                        }
+                                        },
 
                                         email: {
                                           sender_address: %{"notifier" <notifier@example.com>},
