@@ -20,8 +20,8 @@ Gem::Specification.new do |s|
   s.test_files = `git ls-files -- test`.split("\n")
   s.require_path = 'lib'
 
-  s.add_dependency('actionmailer', '>= 5.2', '< 8')
-  s.add_dependency('activesupport', '>= 5.2', '< 8')
+  s.add_dependency('actionmailer', '>= 5.2', '< 9')
+  s.add_dependency('activesupport', '>= 5.2', '< 9')
 
   s.add_development_dependency 'appraisal', '~> 2.2.0'
   s.add_development_dependency 'aws-sdk-sns', '~> 1'
