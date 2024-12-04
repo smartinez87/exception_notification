@@ -20,10 +20,16 @@ if ::Sidekiq::VERSION < '3'
       chain.add ::ExceptionNotification::Sidekiq
     end
   end
-else
+elsif ::Sidekiq::VERSION < '7.1.5'
   ::Sidekiq.configure_server do |config|
     config.error_handlers << proc do |ex, context|
       ExceptionNotifier.notify_exception(ex, data: { sidekiq: context })
+    end
+  end
+else
+  ::Sidekiq.configure_server do |config|
+    config.error_handlers << proc do |ex, context, config|
+      ExceptionNotifier.notify_exception(ex, data: { sidekiq: { context: context, config: config } })
     end
   end
 end
