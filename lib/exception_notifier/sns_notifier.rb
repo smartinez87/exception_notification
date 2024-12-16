@@ -5,14 +5,12 @@ module ExceptionNotifier
     def initialize(options)
       super
 
+      allowed_keys = %i[region access_key_id secret_access_key]
+
       raise ArgumentError, "You must provide 'region' option" unless options[:region]
-      raise ArgumentError, "You must provide 'access_key_id' option" unless options[:access_key_id]
-      raise ArgumentError, "You must provide 'secret_access_key' option" unless options[:secret_access_key]
 
       @notifier = Aws::SNS::Client.new(
-        region: options[:region],
-        access_key_id: options[:access_key_id],
-        secret_access_key: options[:secret_access_key]
+        **options.select { |k, _| allowed_keys.include?(k) }
       )
       @options = default_options.merge(options)
     end
