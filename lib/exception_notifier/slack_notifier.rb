@@ -72,6 +72,9 @@ module ExceptionNotifier
       exception_name = "*#{measure_word}* `#{exception_class}`"
       env = options[:env]
 
+      options[:headers] ||= {}
+      options[:headers]['Content-Type'] = 'application/json'
+
       if env.nil?
         data = options[:data] || {}
         text = "#{exception_name} *occured in background*\n"
