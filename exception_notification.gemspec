@@ -36,7 +36,7 @@ Gem::Specification.new do |s|
   s.add_development_dependency 'net-smtp'
   s.add_development_dependency 'rails', '>= 5.2', '< 9'
   s.add_development_dependency 'resque', '~> 1.8.0'
-  s.add_development_dependency 'rubocop', '0.78.0'
+  s.add_development_dependency 'rubocop'
   s.add_development_dependency 'sidekiq', '>= 5.0.4'
   s.add_development_dependency 'slack-notifier', '>= 1.0.0'
   s.add_development_dependency 'timecop', '~> 0.9.0'
