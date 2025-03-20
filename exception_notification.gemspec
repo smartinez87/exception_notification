@@ -34,7 +34,7 @@ Gem::Specification.new do |s|
   s.add_development_dependency 'mocha', '>= 0.13.0'
   s.add_development_dependency 'mock_redis', '~> 0.19.0'
   s.add_development_dependency 'net-smtp'
-  s.add_development_dependency 'rails', '>= 5.2', '< 8'
+  s.add_development_dependency 'rails', '>= 5.2', '< 9'
   s.add_development_dependency 'resque', '~> 1.8.0'
   s.add_development_dependency 'rubocop', '0.78.0'
   s.add_development_dependency 'sidekiq', '>= 5.0.4'

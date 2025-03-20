@@ -1,4 +1,3 @@
 /coverage/
 *.gemfile.lock
-/Gemfile.lock
 /.idea/
