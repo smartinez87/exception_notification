@@ -11,6 +11,7 @@ Gem::Specification.new do |s|
   s.homepage = 'https://smartinez87.github.io/exception_notification/'
   s.email = 'smartinez87@gmail.com'
   s.license = 'MIT'
+  s.metadata = { 'changelog_uri' => 'https://github.com/smartinez87/exception_notification/blob/master/CHANGELOG.rdoc' }
 
   s.required_ruby_version     = '>= 2.3'
   s.required_rubygems_version = '>= 1.8.11'
