@@ -138,7 +138,7 @@ But, you also can easily implement your own [custom notifier](docs/notifiers/cus
 
 In general, ExceptionNotification will send a notification when every error occurs, which may result in a problem: if your site has a high throughput and a particular error is raised frequently, you will receive too many notifications. During a short period of time, your mail box may be filled with thousands of exception mails, or your mail server may even become slow. To prevent this, you can choose to group errors by setting the `:error_grouping` option to `true`.
 
-Error grouping uses a default formula of `log2(errors_count)` to determine whether to send the notification, based on the accumulated error count for each specific exception. This makes the notifier only send a notification when the count is: 1, 2, 4, 8, 16, 32, 64, 128, ..., (2**n). You can use `:notification_trigger` to override this default formula.
+Error grouping uses a default formula of `Math.log2(errors_count)` to determine whether to send the notification, based on the accumulated error count for each specific exception. This makes the notifier only send a notification when the count is: 1, 2, 4, 8, 16, 32, 64, 128, ..., (2**n). You can use `:notification_trigger` to override this default formula.
 
 The following code shows the available options to configure error grouping:
 
