@@ -3,7 +3,7 @@ on:
   - push
   - pull_request
 jobs:
-  rspec:
+  tests:
     runs-on: ubuntu-latest
     strategy:
       fail-fast: true
