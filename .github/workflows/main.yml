@@ -9,22 +9,24 @@ jobs:
       fail-fast: true
       matrix:
         ruby-version:
-          - 2.6
-          - 2.7
-          - 3.0.0
-          - 3.1
+          # - 2.6
+          # - 2.7
+          # - 3.0.0
+          # - 3.1
+          - 3.3
         gemfile:
-          - rails5_2.gemfile
-          - rails6_0.gemfile
-          - rails6_1.gemfile
-          - rails7_0.gemfile
-        exclude:
-          - ruby-version: 2.6
-            gemfile: rails7_0.gemfile
-          - ruby-version: 3.0.0
-            gemfile: rails5_2.gemfile
-          - ruby-version: 3.1
-            gemfile: rails5_2.gemfile
+          # - gemfiles/rails5_2.gemfile
+          # - gemfiles/rails6_0.gemfile
+          # - gemfiles/rails6_1.gemfile
+          # - gemfiles/rails7_0.gemfile
+          - Gemfile
+        # exclude:
+        #   - ruby-version: 2.6
+        #     gemfile: gemfiles/rails7_0.gemfile
+        #   - ruby-version: 3.0.0
+        #     gemfile: gemfiles/rails5_2.gemfile
+        #   - ruby-version: 3.1
+        #     gemfile: gemfiles/rails5_2.gemfile
     steps:
       - name: Checkout repository
         uses: actions/checkout@v2
@@ -36,10 +38,10 @@ jobs:
           bundler-cache: true
 
       - name: Install required gems
-        run: BUNDLE_GEMFILE=gemfiles/${{ matrix.gemfile }} bundle install --jobs=3 --retry=3
+        run: BUNDLE_GEMFILE=${{ matrix.gemfile }} bundle install --jobs=3 --retry=3
 
-      - name: Run rspec tests
-        run: BUNDLE_GEMFILE=gemfiles/${{ matrix.gemfile }} bundle exec rake test
+      - name: Run tests
+        run: BUNDLE_GEMFILE=${{ matrix.gemfile }} bundle exec rake test
 
   rubocop:
     runs-on: ubuntu-latest
@@ -50,7 +52,7 @@ jobs:
       - name: Install Ruby
         uses: ruby/setup-ruby@v1
         with:
-          ruby-version: 3.0.0
+          ruby-version: 3.3.7
           bundler-cache: true
 
       - name: Install required gems

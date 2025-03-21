@@ -38,7 +38,7 @@ module ExceptionNotifier
         @controller = @request_items = nil
       else
         @controller = @env['action_controller.instance'] || MissingController.new
-        @additional_exception_data = @env["exception_notifier.exception_data"]
+        @additional_exception_data = @env['exception_notifier.exception_data']
         request = ActionDispatch::Request.new(@env)
 
         @request_items = { url: request.original_url,

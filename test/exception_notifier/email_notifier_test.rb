@@ -295,8 +295,7 @@ class EmailNotifierWithEnvTest < ActiveSupport::TestCase
       Environment:
       -------------------------------
 
-        * CONTENT_LENGTH                            : 0
-          * HTTPS                                     : on
+        * HTTPS                                     : on
           * HTTP_HOST                                 : test.address
           * HTTP_USER_AGENT                           : Rails Testing
           * PATH_INFO                                 : /
@@ -306,24 +305,19 @@ class EmailNotifierWithEnvTest < ActiveSupport::TestCase
           * SCRIPT_NAME                               :
           * SERVER_NAME                               : example.org
           * SERVER_PORT                               : 80
+          * SERVER_PROTOCOL                           : HTTP/1.1
           * action_controller.instance                : #{@controller}
           * action_dispatch.parameter_filter          : [\"secret\"]
-          * action_dispatch.request.content_type      :
           * action_dispatch.request.parameters        : {"id"=>"foo", "secret"=>"[FILTERED]"}
           * action_dispatch.request.path_parameters   : {}
           * action_dispatch.request.query_parameters  : {"id"=>"foo", "secret"=>"[FILTERED]"}
           * action_dispatch.request.request_parameters: {}
           * rack.errors                               : #{@test_env['rack.errors']}
-          * rack.input                                : #{@test_env['rack.input']}
-          * rack.multiprocess                         : true
-          * rack.multithread                          : true
-          * rack.request.query_hash                   : {"id"=>"foo", "secret"=>"[FILTERED]"}
-          * rack.request.query_string                 : id=foo&secret=secret
-          * rack.run_once                             : false
+          * rack.request.form_hash                    : {}
+          * rack.request.form_input                   :
           * rack.session                              : #{@test_env['rack.session']}
           * rack.session.options                      : #{@test_env['rack.session.options']}
           * rack.url_scheme                           : http
-          * rack.version                              : #{Rack::VERSION}
 
       -------------------------------
       Backtrace:

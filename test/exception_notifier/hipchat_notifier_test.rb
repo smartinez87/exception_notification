@@ -2,13 +2,7 @@
 
 require 'test_helper'
 require 'rack'
-
-# silence_warnings trick around require can be removed once
-# https://github.com/hipchat/hipchat-rb/pull/174
-# gets merged and released
-silence_warnings do
-  require 'hipchat'
-end
+require 'hipchat'
 
 class HipchatNotifierTest < ActiveSupport::TestCase
   test 'should send hipchat notification if properly configured' do
