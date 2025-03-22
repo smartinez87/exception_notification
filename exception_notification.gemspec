@@ -20,6 +20,9 @@ Gem::Specification.new do |s|
   s.test_files = `git ls-files -- test`.split("\n")
   s.require_path = 'lib'
 
+  s.post_install_message = "The `exception_notification` gem has moved.
+This repo is no longer maintained and all development should move to: https://github.com/kmcphillips/exception_notification"
+
   s.add_dependency('actionmailer', '>= 5.2', '< 9')
   s.add_dependency('activesupport', '>= 5.2', '< 9')
 
